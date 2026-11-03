@@ -16,3 +16,6 @@ Route::get('/forgot-password', [LoginController::class, 'forgotPassword'])->name
 
 Route::view('/create-post', 'posts.create')
     ->name('posts.create');
+
+Route::view('/posts', 'posts.melihat-postingan')
+    ->name('posts.melihat-postingan');
