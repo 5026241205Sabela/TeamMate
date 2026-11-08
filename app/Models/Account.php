@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Account extends Model
+class Account extends Authenticatable
 {
     protected $table = 'accounts';
 
@@ -21,8 +21,14 @@ class Account extends Model
         'nim',
         'ktm',
         'password',
-        'role',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
+    }
 
     public function posts(): HasMany
     {
