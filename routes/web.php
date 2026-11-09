@@ -25,6 +25,18 @@ Route::get('/create-post', [CompetitionPostController::class, 'create'])
 Route::post('/create-post', [CompetitionPostController::class, 'store'])
     ->name('posts.store');
 
+// Route untuk menampilkan postingan milik user
+Route::get('/my-posts', [CompetitionPostController::class, 'index'])
+    ->name('posts.index');
+
+// Route untuk menampilkan form edit status postingan
+Route::get('/my-posts/{post}/edit', [CompetitionPostController::class, 'edit'])
+    ->name('posts.edit');
+
+// Route untuk menyimpan perubahan status postingan
+Route::patch('/my-posts/{post}/status', [CompetitionPostController::class, 'updateStatus'])
+    ->name('posts.update-status');
+
 // Route fitur edit post status (punyamu)
 Route::view('/edit-post-status', 'posts.edit-post-status');
 

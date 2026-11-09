@@ -20,6 +20,61 @@ class CompetitionPostController extends Controller
      */
     private const TEST_ACCOUNT_ID = 2;
 
+    public function index(): View
+    {
+        $account = Account::find(self::TEST_ACCOUNT_ID);
+
+        $posts = Post::with('category')
+            ->where('account_id', self::TEST_ACCOUNT_ID)
+            ->orderByDesc('date_created')
+            ->get();
+
+        return view('posts.my-posts', [
+            'posts' => $posts,
+            'testingAccount' => $account,
+        ]);
+    }
+
+    public function edit(int $id): View
+    {
+        $post = Post::with('category')
+            ->where('post_id', $id)
+            ->where('account_id', self::TEST_ACCOUNT_ID)
+            ->firstOrFail();
+
+        return view('posts.edit-post-status', [
+            'post' => $post,
+            'testingAccount' => Account::find(self::TEST_ACCOUNT_ID),
+        ]);
+    }
+
+    public function updateStatus(Request $request, int $id): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:active,closed,completed'],
+        ]);
+
+        $post = Post::where('post_id', $id)
+            ->where('account_id', self::TEST_ACCOUNT_ID)
+            ->firstOrFail();
+
+        $post->post_status = $validated['status'];
+
+        if ($validated['status'] === 'completed') {
+            $post->status_change_time = now();
+            $post->deletion_schedule = now()->addDays(2);
+        } else {
+            $post->status_change_time = null;
+            $post->deletion_schedule = null;
+        }
+
+        $post->save();
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Status successfully updated');
+    }
+
     public function create(): View
     {
         $categories = Category::query()

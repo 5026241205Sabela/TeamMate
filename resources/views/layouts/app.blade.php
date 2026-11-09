@@ -344,7 +344,9 @@
             </a>
             <a class="nav-link" href="{{ route('home') }}"><span class="nav-icon">⌂</span> Home</a>
             {{-- These navigation destinations can be connected when their pages are ready. --}}
-            <a class="nav-link" href="#"><span class="nav-icon">▤</span> My Posts</a>
+            <a class="nav-link" href="{{ route('posts.index') }}">
+                <span class="nav-icon">â–¤</span> My Posts
+            </a>
             <a class="nav-link" href="#"><span class="nav-icon">♧</span> Requests</a>
             <a class="nav-link" href="#"><span class="nav-icon">♧</span> Notifications</a>
             <a class="nav-link" href="#"><span class="nav-icon">♙</span> Profile</a>
