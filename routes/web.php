@@ -8,3 +8,5 @@ Route::get('/', function () {
 
 Route::view('/create-post', 'posts.create')
     ->name('posts.create');
+
+Route::view('/edit-post-status', 'posts.edit-post-status');
