@@ -1,10 +1,9 @@
 <footer class="bg-navy-900 text-slate-300">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
-            <div class="flex items-center gap-2">
-                <span class="flex size-9 items-center justify-center rounded-xl bg-sky-400 text-sm font-bold text-navy-900">TM</span>
-                <span class="text-lg font-bold text-white">TeamMate</span>
-            </div>
+            <a href="{{ route('home') }}" class="inline-block text-[25px] font-bold tracking-tight text-white">
+                TeamMate<span class="text-sky-400">.</span>
+            </a>
             <p class="mt-4 text-sm leading-relaxed">
                 Platform yang membantu mahasiswa menemukan anggota tim untuk kompetisi, lomba, dan kegiatan akademik.
             </p>

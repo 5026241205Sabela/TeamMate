@@ -86,9 +86,14 @@ DB_PORT=5432
 DB_DATABASE=teammate_db
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
+DB_SSLMODE=prefer
 ```
 
 Replace the database credentials with your local PostgreSQL configuration.
+
+To use a hosted PostgreSQL service such as Aiven, use the host, port, user, password, and database name from the service's connection information, and set `DB_SSLMODE=require`.
+
+> The migrations use PostgreSQL-specific identity columns, so MySQL and SQLite are not supported.
 
 ### 5. Run Database Migrations
 

@@ -1,8 +1,7 @@
 <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
     <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <a href="{{ route('home') }}" class="flex items-center gap-2">
-            <span class="flex size-9 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white">TM</span>
-            <span class="text-lg font-bold text-navy-900">TeamMate</span>
+        <a href="{{ route('home') }}" class="text-[25px] font-bold tracking-tight text-[#3157a4]">
+            TeamMate.
         </a>
 
         <input type="checkbox" id="nav-toggle" class="peer hidden">
