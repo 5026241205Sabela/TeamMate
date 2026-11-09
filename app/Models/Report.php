@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Report extends Model
 {
+    use HasUuids;
+
     protected $table = 'reports';
 
     protected $primaryKey = 'report_id';
@@ -18,7 +21,6 @@ class Report extends Model
     public $timestamps = false;
 
         protected $fillable = [
-            'report_id',
             'post_id',
             'reason',
             'description',

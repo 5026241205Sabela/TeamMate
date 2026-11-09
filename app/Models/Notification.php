@@ -16,7 +16,6 @@ class Notification extends Model
     protected $fillable = [
         'account_id',
         'message',
-        'time_created',
     ];
 
     public function account(): BelongsTo
