@@ -41,7 +41,7 @@
             method="GET"
             class="card space-y-4 p-5"
         >
-            <div class="grid gap-4 sm:grid-cols-[1fr_15rem_auto] sm:items-end">
+            <div class="grid gap-4 lg:grid-cols-[1fr_15rem_auto] lg:items-end">
                 <div>
                     <label for="filter-keyword" class="mb-1.5 block text-xs font-semibold tracking-wide text-slate-500 uppercase">
                         Keyword Search
@@ -108,13 +108,13 @@
             </div>
 
             <div data-feed-url="{{ route('posts.latest') }}" aria-live="polite" aria-busy="true">
-                <div data-feed-skeleton class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div data-feed-skeleton class="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
                     <x-post-skeleton />
                     <x-post-skeleton />
                     <x-post-skeleton />
                 </div>
 
-                <div data-feed-target hidden class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div data-feed-target hidden class="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
                     @include('posts.partials.latest', ['posts' => $posts])
                 </div>
 

@@ -34,16 +34,19 @@
     @else
 
         @foreach ($posts as $post)
-            <div class="form-card" style="display: flex; gap: 20px; align-items: center;">
+            @php
+                $hasPoster = filled($post->poster) && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->poster);
+            @endphp
+            <div class="form-card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
 
-                @if ($post->poster)
+                @if ($hasPoster)
                     <img
                         src="{{ asset('storage/' . $post->poster) }}"
                         alt="Competition poster"
-                        style="width: 110px; height: 110px; object-fit: cover; border-radius: 12px;"
+                        style="width: 110px; height: 110px; object-fit: cover; border-radius: 12px; flex-shrink: 0;"
                     >
                 @else
-                    <div style="width: 110px; height: 110px; background: #edf1f6; border-radius: 12px; display: grid; place-items: center;">
+                    <div style="width: 110px; height: 110px; background: #edf1f6; color: #64748b; font-size: 12px; font-weight: 600; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0;">
                         No Poster
                     </div>
                 @endif

@@ -161,7 +161,7 @@
     <div class="post-card">
         <div class="post-info">
 
-            @if ($post->poster)
+            @if (filled($post->poster) && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->poster))
                 <img
                     class="post-image"
                     src="{{ asset('storage/' . $post->poster) }}"

@@ -4,7 +4,8 @@
         $authorName = $post->account?->full_name ?? 'TeamMate Student';
         $universityName = $post->account?->university ?? 'University';
         $postedTime = $post->date_created ? $post->date_created->diffForHumans() : 'Just now';
-        $posterUrl = $post->poster ? \Illuminate\Support\Facades\Storage::url($post->poster) : null;
+        $hasPosterFile = filled($post->poster) && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->poster);
+        $posterUrl = $hasPosterFile ? \Illuminate\Support\Facades\Storage::url($post->poster) : null;
         $initials = collect(explode(' ', trim($authorName)))
             ->filter()
             ->take(2)
@@ -13,7 +14,7 @@
     @endphp
 
     <article
-        class="card card-interactive reveal-in flex cursor-pointer flex-col justify-between p-5"
+        class="card card-interactive reveal-in flex h-full cursor-pointer flex-col overflow-hidden p-0"
         style="--i: {{ $loop->index }}"
         data-post-card
         data-post-id="{{ $post->post_id }}"
@@ -26,61 +27,83 @@
         data-post-criteria="{{ $post->member_criteria ?? 'Open to committed students from any major.' }}"
         data-post-report-url="{{ route('reports.create', $post->post_id) }}"
     >
-        <div>
-            <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-semibold text-[#2160f5]">
-                    {{ $categoryName }}
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#e6f9ec] px-2.5 py-0.5 text-[11px] font-bold text-[#139447]">
-                    Still Looking
-                </span>
-            </div>
-
+        {{-- Uniform 16:9 / h-40 Poster / Cover Header --}}
+        <div class="relative flex h-40 w-full shrink-0 flex-col justify-between overflow-hidden border-b border-slate-100 bg-slate-100 p-4">
             @if ($posterUrl)
                 <img
                     src="{{ $posterUrl }}"
                     alt="{{ $post->title }}"
-                    class="mt-3 h-36 w-full rounded-xl border border-slate-100 object-cover"
+                    class="absolute inset-0 size-full object-cover"
                     loading="lazy"
+                    onerror="this.style.display='none'"
                 >
-            @endif
-
-            <h3 class="mt-3 text-base font-bold text-navy-900">{{ $post->title }}</h3>
-
-            @if ($post->description)
-                <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600">{{ $post->description }}</p>
-            @endif
-
-            @if ($post->member_criteria)
-                <div class="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700">
-                    <span class="font-semibold text-navy-900">Team Criteria:</span>
-                    <p class="mt-0.5 line-clamp-2">{{ $post->member_criteria }}</p>
+                <div class="absolute inset-0 bg-slate-900/25"></div>
+            @else
+                <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div class="flex flex-col items-center gap-1.5 text-slate-400">
+                        <svg class="size-8 stroke-[1.6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="16" rx="2.5" />
+                            <circle cx="8.5" cy="9.5" r="1.5" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 15-4.5-4.5L7 20" />
+                        </svg>
+                        <span class="text-[11px] font-semibold tracking-wide uppercase">{{ $categoryName }}</span>
+                    </div>
                 </div>
             @endif
+
+            <div class="relative z-10 flex items-center justify-between gap-2">
+                <span class="rounded-lg bg-white/95 px-2.5 py-1 text-xs font-semibold text-[#2160f5] shadow-2xs backdrop-blur-xs">
+                    {{ $categoryName }}
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#e6f9ec] px-2.5 py-1 text-[11px] font-bold text-[#139447] shadow-2xs">
+                    <span class="size-1.5 rounded-full bg-[#139447]"></span>
+                    Still Looking
+                </span>
+            </div>
         </div>
 
-        <div class="mt-4 pt-4">
-            <div class="flex items-center gap-3 border-t border-slate-100 pt-3.5">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#079b72] text-xs font-bold text-white">
-                    {{ $initials }}
-                </span>
-                <div class="min-w-0 flex-1 text-xs">
-                    <p class="truncate font-semibold text-navy-900">{{ $authorName }}</p>
-                    <p class="truncate text-slate-500">{{ $universityName }} &middot; {{ $postedTime }}</p>
+        {{-- Uniform Card Body --}}
+        <div class="flex flex-1 flex-col justify-between p-5">
+            <div>
+                <h3 class="line-clamp-2 min-h-[2.75rem] text-base leading-snug font-bold text-navy-900" title="{{ $post->title }}">
+                    {{ $post->title }}
+                </h3>
+
+                <p class="mt-1.5 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-slate-600">
+                    {{ $post->description ?: 'No additional description provided.' }}
+                </p>
+
+                <div class="mt-3.5 min-h-[4.5rem] rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700">
+                    <span class="font-semibold text-navy-900">Team Criteria:</span>
+                    <p class="mt-0.5 line-clamp-2">
+                        {{ $post->member_criteria ?: 'Open to committed students from any major.' }}
+                    </p>
                 </div>
             </div>
 
-            <div class="mt-3.5 flex items-center gap-2">
-                <button type="button" data-open-post-detail class="btn btn-primary flex-1 py-2 text-xs">
-                    View Details
-                </button>
-                <a
-                    href="{{ route('reports.create', $post->post_id) }}"
-                    class="btn px-3 py-2 text-xs text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                    title="Report this post"
-                >
-                    Report
-                </a>
+            <div class="mt-4 pt-4">
+                <div class="flex items-center gap-3 border-t border-slate-100 pt-3.5">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#079b72] text-xs font-bold text-white">
+                        {{ $initials }}
+                    </span>
+                    <div class="min-w-0 flex-1 text-xs">
+                        <p class="truncate font-semibold text-navy-900">{{ $authorName }}</p>
+                        <p class="truncate text-slate-500">{{ $universityName }} &middot; {{ $postedTime }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-3.5 flex items-center gap-2">
+                    <button type="button" data-open-post-detail class="btn btn-primary flex-1 py-2 text-xs">
+                        View Details
+                    </button>
+                    <a
+                        href="{{ route('reports.create', $post->post_id) }}"
+                        class="btn px-3 py-2 text-xs text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                        title="Report this post"
+                    >
+                        Report
+                    </a>
+                </div>
             </div>
         </div>
     </article>
