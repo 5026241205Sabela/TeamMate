@@ -116,7 +116,9 @@
                     <x-post-skeleton />
                 </div>
 
-                <div data-feed-target hidden class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+                <div data-feed-target hidden class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @include('posts.partials.latest', ['posts' => $posts])
+                </div>
 
                 <noscript>
                     <p class="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">

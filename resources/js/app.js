@@ -195,7 +195,16 @@ if (feed) {
         });
     }
 
-    loadFeed();
+    if (target.children.length > 0) {
+        setTimeout(() => {
+            updateCount();
+            skeleton.hidden = true;
+            target.hidden = false;
+            feed.setAttribute('aria-busy', 'false');
+        }, 180);
+    } else {
+        loadFeed();
+    }
 }
 
 /**

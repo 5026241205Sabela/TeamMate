@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class PostController extends Controller
@@ -15,12 +17,17 @@ class PostController extends Controller
      */
     public function home(): View
     {
-        $categories = Category::query()
-            ->orderBy('category_name')
-            ->get();
+        $categories = Cache::remember(
+            'categories.ordered',
+            300,
+            fn (): Collection => Category::query()->orderBy('category_name')->get()
+        );
+
+        $posts = $this->queryActivePosts();
 
         return view('home', [
             'categories' => $categories,
+            'posts' => $posts,
         ]);
     }
 
@@ -32,7 +39,19 @@ class PostController extends Controller
         $keyword = trim($request->string('q')->toString());
         $categoryId = $request->integer('category_id');
 
-        $posts = Post::query()
+        $posts = $this->queryActivePosts($keyword, $categoryId);
+
+        return view('posts.partials.latest', ['posts' => $posts]);
+    }
+
+    /**
+     * Fetch the latest active recruitment posts with optional keyword and category filters.
+     *
+     * @return Collection<int, Post>
+     */
+    private function queryActivePosts(string $keyword = '', int $categoryId = 0): Collection
+    {
+        return Post::query()
             ->with(['account:account_id,full_name,university', 'category:category_id,category_name'])
             ->where('post_status', 'active')
             ->when($categoryId > 0, fn (Builder $query) => $query->where('category_id', $categoryId))
@@ -47,7 +66,5 @@ class PostController extends Controller
             ->latest('date_created')
             ->limit(12)
             ->get();
-
-        return view('posts.partials.latest', ['posts' => $posts]);
     }
 }

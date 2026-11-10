@@ -87,7 +87,36 @@ return [
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
+            'host' => (static function (): string {
+                $host = (string) env('DB_HOST', '127.0.0.1');
+
+                if (
+                    (bool) env('DB_FORCE_IPV4', true)
+                    && $host !== ''
+                    && $host !== 'localhost'
+                    && filter_var($host, FILTER_VALIDATE_IP) === false
+                ) {
+                    $cacheFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.'teammate_dns_'.md5($host).'.cache';
+
+                    if (is_file($cacheFile) && (time() - (int) @filemtime($cacheFile)) < 3600) {
+                        $cachedIp = trim((string) @file_get_contents($cacheFile));
+
+                        if (filter_var($cachedIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+                            return $cachedIp;
+                        }
+                    }
+
+                    $resolved = gethostbyname($host);
+
+                    if (filter_var($resolved, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+                        @file_put_contents($cacheFile, $resolved, LOCK_EX);
+
+                        return $resolved;
+                    }
+                }
+
+                return $host;
+            })(),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
@@ -97,6 +126,10 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'options' => extension_loaded('pdo_pgsql') ? [
+                PDO::ATTR_PERSISTENT => (bool) env('DB_PERSISTENT', true),
+                PDO::ATTR_TIMEOUT => (int) env('DB_TIMEOUT', 5),
+            ] : [],
         ],
 
         'sqlsrv' => [
