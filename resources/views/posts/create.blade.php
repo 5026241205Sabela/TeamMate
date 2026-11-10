@@ -1,215 +1,158 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Competition Post | TeamMate</title>
+@section('title', 'Create Competition Post | TeamMate')
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+@section('content')
+    <header class="page-header">
+        <h1>Create Competition Post</h1>
+        <p>Fill in the competition details to recruit teammates.</p>
+    </header>
 
-        body {
-            background: #f5f6fa;
-            color: #252b3b;
-        }
+    <div class="page-body">
+        @if (session('success'))
+            <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+        @endif
 
-        .navbar {
-            background: #ffffff;
-            padding: 20px 8%;
-            border-bottom: 1px solid #e5e7eb;
-        }
+        @if (session('error'))
+            <div class="alert alert-error" role="alert">{{ session('error') }}</div>
+        @endif
 
-        .logo {
-            font-size: 25px;
-            font-weight: bold;
-            color: #3157a4;
-        }
-
-        .container {
-            max-width: 850px;
-            margin: 55px auto;
-            padding: 0 20px;
-        }
-
-        .page-heading {
-            margin-bottom: 28px;
-        }
-
-        .page-heading h1 {
-            font-size: 30px;
-            margin-bottom: 10px;
-        }
-
-        .page-heading p {
-            color: #777f8d;
-            line-height: 1.6;
-        }
-
-        .post-card {
-            background: white;
-            padding: 35px;
-            border-radius: 14px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .required {
-            color: #e34b4b;
-        }
-
-        .field {
-            width: 100%;
-            padding: 14px 15px;
-            border: 1px solid #d9dde5;
-            border-radius: 8px;
-            background: #fafbfc;
-            color: #9299a6;
-            font-size: 14px;
-        }
-
-        .description {
-            height: 130px;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .upload-area {
-            border: 2px dashed #d9dde5;
-            border-radius: 9px;
-            padding: 30px;
-            text-align: center;
-            color: #8992a2;
-            background: #fafbfc;
-            font-size: 14px;
-        }
-
-        .upload-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .button-group {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 32px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .btn-cancel {
-            background: #f0f1f4;
-            color: #555d6b;
-        }
-
-        .btn-publish {
-            background: #3157a4;
-            color: white;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                margin: 35px auto;
-            }
-
-            .post-card {
-                padding: 22px;
-            }
-
-            .page-heading h1 {
-                font-size: 25px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <nav class="navbar">
-        <div class="logo">TeamMate.</div>
-    </nav>
-
-    <main class="container">
-
-        <div class="page-heading">
-            <h1>Create Competition Post</h1>
-            <p>
-                Share your competition opportunity and find
-                the perfect teammates to achieve your goals.
-            </p>
-        </div>
-
-        <section class="post-card">
-
-            <div class="form-group">
-                <label>
-                    Competition Title <span class="required">*</span>
-                </label>
-                <div class="field">Enter competition title</div>
+        @if ($errors->any())
+            <div class="alert alert-error" role="alert">
+                <strong>Please check your input:</strong>
+                <ul style="margin: 8px 0 0; padding-left: 20px;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
+        @endif
 
-            <div class="form-group">
-                <label>
-                    Category <span class="required">*</span>
-                </label>
-                <div class="field">Select competition category</div>
-            </div>
+        <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-            <div class="form-group">
-                <label>
-                    Description <span class="required">*</span>
-                </label>
-                <div class="field description">
-                    Describe your competition...
+            <section class="form-card">
+                <div class="field-group">
+                    <label class="field-label" for="title">
+                        Competition Title <span class="required">*</span>
+                    </label>
+                    <input
+                        class="form-control"
+                        type="text"
+                        id="title"
+                        name="title"
+                        maxlength="255"
+                        placeholder="e.g. National Business Case Competition 2025"
+                        value="{{ old('title') }}"
+                        required
+                    >
+                    @error('title') <div class="error-text">{{ $message }}</div> @enderror
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Competition Poster</label>
-                <div class="upload-area">
-                    <div class="upload-icon">🖼️</div>
-                    <p>Upload your competition poster</p>
-                    <small>PNG, JPG or JPEG</small>
+                <div class="field-group">
+                    <label class="field-label" for="category_id">
+                        Competition Category <span class="required">*</span>
+                    </label>
+                    <select class="form-control" id="category_id" name="category_id" required>
+                        <option value="">Select a category...</option>
+                        @foreach ($categories as $category)
+                            <option
+                                value="{{ $category->category_id }}"
+                                @selected(old('category_id') == $category->category_id)
+                            >
+                                {{ $category->category_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if ($categories->isEmpty())
+                        <div class="error-text">Belum ada kategori di database. Tambahkan kategori terlebih dahulu.</div>
+                    @endif
+                    @error('category_id') <div class="error-text">{{ $message }}</div> @enderror
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Team Member Criteria</label>
-                <div class="field description">
-                    Describe the teammates you are looking for...
+                <div class="field-group">
+                    <label class="field-label" for="description">
+                        Competition Description <span class="required">*</span>
+                    </label>
+                    <textarea
+                        class="form-control"
+                        id="description"
+                        name="description"
+                        placeholder="Describe the competition, what you're looking for, and any important details..."
+                        required
+                    >{{ old('description') }}</textarea>
+                    @error('description') <div class="error-text">{{ $message }}</div> @enderror
                 </div>
+            </section>
+
+            <section class="form-card">
+                <div class="field-group">
+                    <label class="field-label" for="poster">
+                        Competition Poster <span class="required">*</span>
+                    </label>
+
+                    <label class="upload-box" for="poster">
+                        <span class="upload-icon">▧</span>
+                        <span class="upload-main" id="upload-label">Click to upload image</span>
+                        <span class="upload-help">PNG, JPG, WEBP — maximum 2 MB</span>
+                        <input
+                            class="file-input"
+                            type="file"
+                            id="poster"
+                            name="poster"
+                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                            required
+                        >
+                    </label>
+
+                    <img id="poster-preview" class="poster-preview" alt="Competition poster preview">
+                    @error('poster') <div class="error-text">{{ $message }}</div> @enderror
+                </div>
+            </section>
+
+            <section class="form-card">
+                <div class="field-group">
+                    <label class="field-label" for="member_criteria">Team Member Criteria</label>
+                    <textarea
+                        class="form-control"
+                        id="member_criteria"
+                        name="member_criteria"
+                        placeholder="Describe the skills, qualifications, and commitments you expect from teammates..."
+                    >{{ old('member_criteria') }}</textarea>
+                    @error('member_criteria') <div class="error-text">{{ $message }}</div> @enderror
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <a href="{{ route('home') }}" class="btn">Cancel</a>
+                <button type="submit" class="btn btn-primary">Publish Post</button>
             </div>
+        </form>
+    </div>
+@endsection
 
-            <div class="button-group">
-                <div class="btn btn-cancel">Cancel</div>
-                <div class="btn btn-publish">Publish Post</div>
-            </div>
+@push('scripts')
+<script>
+    const posterInput = document.getElementById('poster');
+    const posterPreview = document.getElementById('poster-preview');
+    const uploadLabel = document.getElementById('upload-label');
 
-        </section>
+    posterInput.addEventListener('change', function () {
+        const file = this.files && this.files[0];
 
-    </main>
+        if (!file) {
+            posterPreview.style.display = 'none';
+            posterPreview.removeAttribute('src');
+            uploadLabel.textContent = 'Click to upload image';
+            return;
+        }
 
-</body>
-</html>
+        uploadLabel.textContent = file.name;
+
+        if (file.type.startsWith('image/')) {
+            posterPreview.src = URL.createObjectURL(file);
+            posterPreview.style.display = 'block';
+        }
+    });
+</script>
+@endpush
