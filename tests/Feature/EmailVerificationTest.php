@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Account;
+use App\Notifications\AccountRejectedNotification;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -96,4 +97,68 @@ test('the verification email is written in Indonesian with a verify button', fun
     expect($mail->subject)->toBe('Verifikasi email akun TeamMate kamu')
         ->and($mail->actionText)->toBe('Verifikasi Email')
         ->and($mail->actionUrl)->toContain('/email/verify/'.$account->getKey());
+});
+
+test('admin can approve a pending account which sends the verification email, and clicking the email link logs the user into homepage', function () {
+    Notification::fake();
+
+    $admin = makeAccount(['email' => 'admin@teammate.test', 'nim' => '0000000001', 'role' => 'admin']);
+    $student = makeAccount([
+        'email' => 'baru@student.test',
+        'nim' => '26019999',
+        'verification_status' => 'pending',
+    ], verified: false);
+
+    $this->actingAs($admin)
+        ->get(route('admin.verifications.index'))
+        ->assertOk()
+        ->assertSee($student->full_name);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.verifications.approve', $student->account_id))
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect($student->fresh()->verification_status)->toBe('approved');
+    Notification::assertSentTo($student, VerifyEmail::class);
+
+    auth()->logout();
+
+    $this->get(verificationUrl($student->fresh()))
+        ->assertRedirect(route('home'))
+        ->assertSessionHas('success');
+
+    expect($student->fresh()->hasVerifiedEmail())->toBeTrue();
+    $this->assertAuthenticatedAs($student->fresh());
+});
+
+test('admin can reject an invalid account and send a rejection email with the reason', function () {
+    Notification::fake();
+
+    $admin = makeAccount(['email' => 'admin@teammate.test', 'nim' => '0000000001', 'role' => 'admin']);
+    $student = makeAccount([
+        'email' => 'invalid@student.test',
+        'nim' => '26018888',
+        'verification_status' => 'pending',
+    ], verified: false);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.verifications.reject', $student->account_id), [
+            'rejection_reason' => 'Foto KTM buram dan NIM tidak sesuai.',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect($student->fresh()->verification_status)->toBe('rejected')
+        ->and($student->fresh()->rejection_reason)->toBe('Foto KTM buram dan NIM tidak sesuai.');
+
+    Notification::assertSentTo($student, AccountRejectedNotification::class);
+});
+
+test('non-admin accounts cannot access the admin verification portal', function () {
+    $student = makeAccount();
+
+    $this->actingAs($student)
+        ->get(route('admin.verifications.index'))
+        ->assertForbidden();
 });

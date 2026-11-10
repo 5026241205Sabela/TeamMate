@@ -124,11 +124,15 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'search_path' => env('DB_SEARCH_PATH'),
+            'sslmode' => env('DB_SSLMODE', 'prefer').';gssencmode=disable',
+            'keepalives' => 1,
+            'keepalives_idle' => 30,
+            'keepalives_interval' => 10,
+            'keepalives_count' => 3,
             'options' => extension_loaded('pdo_pgsql') ? [
                 PDO::ATTR_PERSISTENT => (bool) env('DB_PERSISTENT', true),
-                PDO::ATTR_TIMEOUT => (int) env('DB_TIMEOUT', 5),
+                PDO::ATTR_TIMEOUT => (int) env('DB_TIMEOUT', 15),
             ] : [],
         ],
 

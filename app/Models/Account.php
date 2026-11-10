@@ -20,12 +20,36 @@ class Account extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'full_name',
         'email',
+        'email_verified_at',
         'phone_number',
         'university',
         'nim',
         'ktm',
         'password',
+        'role',
+        'verification_status',
+        'rejection_reason',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isPendingAdminVerification(): bool
+    {
+        return ($this->verification_status ?? 'approved') === 'pending';
+    }
+
+    public function isRejectedByAdmin(): bool
+    {
+        return ($this->verification_status ?? 'approved') === 'rejected';
+    }
+
+    public function isApprovedByAdmin(): bool
+    {
+        return ($this->verification_status ?? 'approved') === 'approved';
+    }
 
     /**
      * @var list<string>

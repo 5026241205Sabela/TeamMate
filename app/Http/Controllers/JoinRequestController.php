@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\JoinRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class JoinRequestController extends Controller
@@ -17,10 +17,10 @@ class JoinRequestController extends Controller
         $joinRequests = JoinRequest::with([
             'account',
             'post',
-            'requirementFile'
+            'requirementFile',
         ])
-        ->orderByDesc('request_date')
-        ->get();
+            ->orderByDesc('request_date')
+            ->get();
 
         $pendingRequests = $joinRequests
             ->where('request_status', 'pending');
@@ -47,7 +47,7 @@ class JoinRequestController extends Controller
         $validated = $request->validate([
             'request_status' => [
                 'required',
-                'in:accepted,declined'
+                'in:accepted,declined',
             ],
         ]);
 

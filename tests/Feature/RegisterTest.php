@@ -1,10 +1,7 @@
 <?php
 
 use App\Models\Account;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -37,12 +34,12 @@ test('register page can be rendered', function () {
         ->assertSee(route('login'), false);
 });
 
-test('valid registration creates an account, stores the ktm, sends a verification email and redirects to the homepage', function () {
+test('valid registration creates a pending account, stores the ktm, and waits for admin verification before sending email', function () {
     Storage::fake('local');
     Notification::fake();
 
     $this->post(route('register.store'), validRegistrationData())
-        ->assertRedirect(route('home'))
+        ->assertRedirect(route('verification.notice'))
         ->assertSessionHas('success');
 
     $account = Account::firstWhere('email', 'budi@example.com');
@@ -51,23 +48,26 @@ test('valid registration creates an account, stores the ktm, sends a verificatio
         ->and($account->full_name)->toBe('Budi Santoso')
         ->and($account->nim)->toBe('2201234567')
         ->and($account->role)->toBe('student')
+        ->and($account->verification_status)->toBe('pending')
         ->and($account->hasVerifiedEmail())->toBeFalse()
         ->and(Hash::check('password123', $account->password))->toBeTrue();
 
     Storage::disk('local')->assertExists($account->ktm);
-    Notification::assertSentTo($account, VerifyEmail::class);
+    Notification::assertNothingSent();
     $this->assertAuthenticatedAs($account);
+
+    $this->get(route('home'))->assertRedirect(route('verification.notice'));
 });
 
-test('registration still succeeds when the verification email cannot be sent', function () {
+test('pending student sees waiting for admin verification screen on verification notice', function () {
     Storage::fake('local');
-    Event::listen(Registered::class, fn () => throw new RuntimeException('SMTP down'));
 
-    $this->post(route('register.store'), validRegistrationData())
-        ->assertRedirect(route('home'))
-        ->assertSessionHas('info');
+    $this->post(route('register.store'), validRegistrationData());
 
-    expect(Account::where('email', 'budi@example.com')->exists())->toBeTrue();
+    $this->get(route('verification.notice'))
+        ->assertOk()
+        ->assertSee('Menunggu Verifikasi Admin')
+        ->assertSee('Budi Santoso');
 });
 
 test('email and student id must be unique', function () {

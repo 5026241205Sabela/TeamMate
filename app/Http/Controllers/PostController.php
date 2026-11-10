@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,8 +15,18 @@ class PostController extends Controller
     /**
      * Show the authenticated application homepage (recruitment feed + filters).
      */
-    public function home(): View
+    public function home(Request $request): View|RedirectResponse
     {
+        $account = $request->user();
+
+        if ($account?->isAdmin()) {
+            return to_route('admin.verifications.index');
+        }
+
+        if ($account && ! $account->isApprovedByAdmin()) {
+            return to_route('verification.notice');
+        }
+
         $categories = Category::query()
             ->orderBy('category_name')
             ->get();

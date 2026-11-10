@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountVerificationController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -12,6 +13,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
+        $account = Auth::user();
+
+        if ($account->isAdmin()) {
+            return to_route('admin.verifications.index');
+        }
+
+        if (! $account->isApprovedByAdmin()) {
+            return to_route('verification.notice');
+        }
+
         return to_route('home');
     }
 
@@ -32,18 +43,27 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [LoginController::class, 'forgotPassword'])->name('password.request');
 });
 
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware('signed')
+    ->name('verification.verify');
+
 Route::middleware('auth')->group(function () {
     Route::get('/home', [PostController::class, 'home'])->name('home');
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-        ->middleware('signed')
-        ->name('verification.verify');
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/verifications');
+    Route::get('/verifications', [AccountVerificationController::class, 'index'])->name('verifications.index');
+    Route::patch('/verifications/{account}/approve', [AccountVerificationController::class, 'approve'])->name('verifications.approve');
+    Route::patch('/verifications/{account}/reject', [AccountVerificationController::class, 'reject'])->name('verifications.reject');
+    Route::get('/verifications/{account}/ktm', [AccountVerificationController::class, 'ktm'])->name('verifications.ktm');
 });
 
 Route::get('/posts/latest', [PostController::class, 'latest'])->name('posts.latest');

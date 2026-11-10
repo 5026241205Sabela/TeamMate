@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Post;
+use Illuminate\Console\Command;
 
 class DeleteCompletedPosts extends Command
 {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Models\Account;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,17 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+
+        /** @var Account $account */
+        $account = Auth::user();
+
+        if ($account->isAdmin()) {
+            return redirect()->intended(route('admin.verifications.index'));
+        }
+
+        if ($account->isPendingAdminVerification() || $account->isRejectedByAdmin()) {
+            return to_route('verification.notice');
+        }
 
         return redirect()->intended(route('home'));
     }

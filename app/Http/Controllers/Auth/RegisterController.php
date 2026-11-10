@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Account;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +22,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * Create the account, store the KTM privately, send the verification email and enter the homepage.
+     * Create the student account in "pending" status for Admin KTM review.
      */
     public function store(RegisterRequest $request): RedirectResponse
     {
@@ -38,6 +37,9 @@ class RegisterController extends Controller
                 'nim' => $request->string('student_id')->toString(),
                 'ktm' => $ktmPath,
                 'password' => $request->string('password')->toString(),
+                'role' => 'student',
+                'verification_status' => 'pending',
+                'email_verified_at' => null,
             ]);
         } catch (Throwable $exception) {
             Storage::delete($ktmPath);
@@ -48,16 +50,10 @@ class RegisterController extends Controller
         Auth::login($account);
         $request->session()->regenerate();
 
-        try {
-            event(new Registered($account));
-        } catch (Throwable $exception) {
-            report($exception);
-
-            return to_route('home')
-                ->with('info', 'Akun berhasil dibuat, tetapi email verifikasi belum terkirim. Kamu bisa mengirim ulang link verifikasi dari banner di atas.');
-        }
-
-        return to_route('home')
-            ->with('success', 'Registrasi berhasil! Kami telah mengirim link verifikasi ke email kamu.');
+        return to_route('verification.notice')
+            ->with(
+                'success',
+                'Registrasi berhasil dikirim! Data diri dan foto KTM kamu sedang diperiksa oleh Admin. Setelah disetujui, link verifikasi akan dikirim ke email kamu.'
+            );
     }
 }

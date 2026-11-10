@@ -54,6 +54,8 @@ function createTestSchema(): void
         $table->string('ktm')->nullable();
         $table->string('password');
         $table->string('role', 30)->default('student');
+        $table->string('verification_status', 30)->default('approved');
+        $table->text('rejection_reason')->nullable();
         $table->rememberToken();
     });
 

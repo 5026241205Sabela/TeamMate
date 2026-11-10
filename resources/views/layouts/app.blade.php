@@ -382,59 +382,98 @@
 
 <div class="app-shell">
     <aside class="sidebar">
-        <a class="brand" href="{{ route('home') }}" aria-label="TeamMate Home">
+        <a class="brand" href="{{ $currentAccount?->isAdmin() ? route('admin.verifications.index') : route('home') }}" aria-label="TeamMate Home">
             <x-logo theme="dark" />
         </a>
 
         <nav class="sidebar-nav" aria-label="Sidebar Navigation">
-            <a class="create-link" href="{{ route('posts.create') }}">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
-                </svg>
-                <span>Create Post</span>
-            </a>
+            @if ($currentAccount?->isAdmin())
+                @php
+                    $activeStatus = request()->query('status', 'all');
+                @endphp
 
-            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1v-9.5z" />
-                </svg>
-                <span>Home</span>
-            </a>
+                <a class="nav-link {{ request()->routeIs('admin.verifications.*') && $activeStatus === 'all' ? 'active' : '' }}" href="{{ route('admin.verifications.index', ['status' => 'all']) }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>Semua Pendaftar</span>
+                </a>
 
-            <a class="nav-link {{ request()->routeIs('posts.index', 'posts.edit') ? 'active' : '' }}" href="{{ route('posts.index') }}">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <rect x="4" y="4" width="16" height="16" rx="2.5" />
-                    <path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5" />
-                </svg>
-                <span>My Posts</span>
-            </a>
+                <a class="nav-link {{ request()->routeIs('admin.verifications.*') && $activeStatus === 'pending' ? 'active' : '' }}" href="{{ route('admin.verifications.index', ['status' => 'pending']) }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2" />
+                    </svg>
+                    <span>Menunggu Review</span>
+                    @if (($pendingCount ?? 0) > 0)
+                        <span class="notification-badge">{{ $pendingCount }}</span>
+                    @endif
+                </a>
 
-            <a class="nav-link {{ request()->routeIs('join-requests.*') ? 'active' : '' }}" href="{{ route('join-requests.index') }}">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6M16 11h6" />
-                </svg>
-                <span>Requests</span>
-            </a>
+                <a class="nav-link {{ request()->routeIs('admin.verifications.*') && $activeStatus === 'approved' ? 'active' : '' }}" href="{{ route('admin.verifications.index', ['status' => 'approved']) }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <span>Disetujui (Valid)</span>
+                </a>
 
-            <a class="nav-link" href="#" title="Notifications">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
-                </svg>
-                <span>Notifications</span>
-                @if ($notificationCount > 0)
-                    <span class="notification-badge">{{ $notificationCount }}</span>
-                @endif
-            </a>
+                <a class="nav-link {{ request()->routeIs('admin.verifications.*') && $activeStatus === 'rejected' ? 'active' : '' }}" href="{{ route('admin.verifications.index', ['status' => 'rejected']) }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6" />
+                    </svg>
+                    <span>Ditolak (Tidak Valid)</span>
+                </a>
+            @else
+                <a class="create-link" href="{{ route('posts.create') }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                    </svg>
+                    <span>Create Post</span>
+                </a>
 
-            <a class="nav-link" href="#" title="Profile">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <circle cx="12" cy="8" r="4" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 1 0-16 0" />
-                </svg>
-                <span>Profile</span>
-            </a>
+                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1v-9.5z" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('posts.index', 'posts.edit') ? 'active' : '' }}" href="{{ route('posts.index') }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <rect x="4" y="4" width="16" height="16" rx="2.5" />
+                        <path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5" />
+                    </svg>
+                    <span>My Posts</span>
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('join-requests.*') ? 'active' : '' }}" href="{{ route('join-requests.index') }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6M16 11h6" />
+                    </svg>
+                    <span>Requests</span>
+                </a>
+
+                <a class="nav-link" href="#" title="Notifications">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
+                    </svg>
+                    <span>Notifications</span>
+                    @if ($notificationCount > 0)
+                        <span class="notification-badge">{{ $notificationCount }}</span>
+                    @endif
+                </a>
+
+                <a class="nav-link" href="#" title="Profile">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 1 0-16 0" />
+                    </svg>
+                    <span>Profile</span>
+                </a>
+            @endif
         </nav>
 
         <div class="nav-spacer"></div>

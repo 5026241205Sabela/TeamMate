@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Report extends Model
 {
@@ -20,13 +20,13 @@ class Report extends Model
 
     public $timestamps = false;
 
-        protected $fillable = [
-            'post_id',
-            'reason',
-            'description',
-            'report_date',
-            'report_status',
-         ];
+    protected $fillable = [
+        'post_id',
+        'reason',
+        'description',
+        'report_date',
+        'report_status',
+    ];
 
     public function post(): BelongsTo
     {
