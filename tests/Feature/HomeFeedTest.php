@@ -30,6 +30,11 @@ test('guests are redirected to login when opening the homepage', function () {
 
 test('authenticated accounts see the homepage with sidebar, filter and shimmer skeleton', function () {
     $account = makeAccount();
+    Category::firstOrCreate(['category_name' => 'Teknologi']);
+
+    $this->actingAs($account)
+        ->get(route('home'))
+        ->assertOk();
 
     $this->actingAs($account)
         ->get(route('home'))
