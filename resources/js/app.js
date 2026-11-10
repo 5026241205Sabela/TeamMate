@@ -109,12 +109,19 @@ if (feed) {
     const countLabel = document.querySelector('[data-feed-count]');
     const filterForm = document.querySelector('[data-feed-filter]');
 
-    const updateCount = () => {
-        if (!countLabel) {
-            return;
-        }
-        const total = target.querySelectorAll('[data-post-card]').length;
-        countLabel.textContent = `${total} postingan aktif`;
+
+const updateCount = () => {
+    if (!countLabel) {
+        return;
+    }
+
+    const totalElement = target.querySelector('[data-feed-total]');
+
+    const total = totalElement
+        ? Number(totalElement.dataset.feedTotal)
+        : target.querySelectorAll('[data-post-card]').length;
+
+    countLabel.textContent = `${total} postingan aktif`;
     };
 
     const showError = () => {
@@ -154,6 +161,30 @@ if (feed) {
             feed.setAttribute('aria-busy', 'false');
         }
     }
+
+
+    // Pagination untuk daftar postingan
+    target.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-feed-page]');
+
+        if (!button || button.disabled) {
+            return;
+        }
+
+        const page = Number(button.dataset.feedPage);
+
+        if (!Number.isInteger(page) || page < 1) {
+            return;
+        }
+
+        const params = filterForm
+            ? new URLSearchParams(new FormData(filterForm))
+            : new URLSearchParams();
+
+        params.set('page', String(page));
+
+        loadFeed(params.toString());
+    });
 
     if (filterForm) {
         const categorySelect = filterForm.querySelector('#filter-category');
