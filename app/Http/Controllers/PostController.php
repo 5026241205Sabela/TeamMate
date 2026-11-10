@@ -18,10 +18,15 @@ class PostController extends Controller
     public function home(): View
     {
         $categories = Cache::remember(
-            'categories.ordered',
+            'categories.models.v2',
             300,
             fn (): Collection => Category::query()->orderBy('category_name')->get()
         );
+
+        if ($categories->isNotEmpty() && ! $categories->first() instanceof Category) {
+            Cache::forget('categories.models.v2');
+            $categories = Category::query()->orderBy('category_name')->get();
+        }
 
         $posts = $this->queryActivePosts();
 

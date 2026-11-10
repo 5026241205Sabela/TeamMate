@@ -119,6 +119,21 @@
             flex-shrink: 0;
         }
 
+        .notification-badge {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #f43f46;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
         .nav-spacer { flex: 1; }
 
         .profile-block {
@@ -141,7 +156,7 @@
             height: 36px;
             border-radius: 50%;
             color: white;
-            background: #0284c7;
+            background: #079b72;
             font-size: 12px;
             font-weight: 700;
         }
@@ -348,6 +363,16 @@
 @php
     $currentAccount = auth()->user() ?? ($testingAccount ?? null);
     $accountName = $currentAccount?->full_name ?? 'Student Member';
+    $notificationCount = 0;
+
+    if ($currentAccount && method_exists($currentAccount, 'notifications')) {
+        try {
+            $notificationCount = $currentAccount->notifications()->count();
+        } catch (\Throwable) {
+            $notificationCount = 0;
+        }
+    }
+
     $initials = collect(explode(' ', trim($accountName)))
         ->filter()
         ->take(2)
@@ -391,6 +416,24 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6M16 11h6" />
                 </svg>
                 <span>Requests</span>
+            </a>
+
+            <a class="nav-link" href="#" title="Notifications">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
+                </svg>
+                <span>Notifications</span>
+                @if ($notificationCount > 0)
+                    <span class="notification-badge">{{ $notificationCount }}</span>
+                @endif
+            </a>
+
+            <a class="nav-link" href="#" title="Profile">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 1 0-16 0" />
+                </svg>
+                <span>Profile</span>
             </a>
         </nav>
 

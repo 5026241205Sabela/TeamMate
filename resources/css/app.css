@@ -57,7 +57,7 @@
     }
 
     .btn-primary {
-        @apply bg-navy-900 text-white shadow-sm hover:-translate-y-0.5 hover:bg-navy-700 hover:shadow-md;
+        @apply bg-[#2160f5] text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#1b52d4] hover:shadow-md;
     }
 
     .btn-secondary {

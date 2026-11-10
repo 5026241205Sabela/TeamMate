@@ -6,14 +6,12 @@
     <header class="page-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1>Find Your Competition Teammate</h1>
-            <p>Telusuri tim kompetisi aktif yang sedang membuka rekrutmen anggota baru.</p>
+            <p>Browse active competition posts and connect with students looking for teammates.</p>
         </div>
-        <a href="{{ route('posts.create') }}" class="btn-primary self-start sm:self-auto">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
-            </svg>
-            Create Post
-        </a>
+        <div class="sm:text-right">
+            <strong class="block text-2xl leading-tight font-bold text-navy-900 tabular-nums">{{ $posts->count() }}</strong>
+            <small class="text-xs text-slate-500">Active posts</small>
+        </div>
     </header>
 
     <div class="page-body space-y-6">
@@ -81,13 +79,13 @@
 
             @if ($categories->isNotEmpty())
                 <div class="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3.5">
-                    <span class="text-xs font-medium text-slate-500">Kategori cepat:</span>
+                    <span class="text-xs font-medium text-slate-500">Quick filter:</span>
                     <button
                         type="button"
                         data-category-pill=""
-                        class="cursor-pointer rounded-lg bg-navy-900 px-3 py-1 text-xs font-semibold text-white transition"
+                        class="cursor-pointer rounded-lg bg-[#2160f5] px-3 py-1 text-xs font-semibold text-white transition"
                     >
-                        Semua
+                        All
                     </button>
                     @foreach ($categories as $category)
                         <button

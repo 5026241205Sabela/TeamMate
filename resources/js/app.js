@@ -162,7 +162,7 @@ if (feed) {
         const syncPills = (activeValue) => {
             categoryPills.forEach((pill) => {
                 const isSelected = pill.dataset.categoryPill === String(activeValue ?? '');
-                pill.classList.toggle('bg-navy-900', isSelected);
+                pill.classList.toggle('bg-[#2160f5]', isSelected);
                 pill.classList.toggle('text-white', isSelected);
                 pill.classList.toggle('bg-slate-100', !isSelected);
                 pill.classList.toggle('text-slate-700', !isSelected);
