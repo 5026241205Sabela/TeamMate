@@ -16,57 +16,64 @@ use Throwable;
 class CompetitionPostController extends Controller
 {
     /**
-     * Fallback testing account when no user is authenticated in isolated tests.
+     * Get the currently authenticated account.
      */
-    private const TEST_ACCOUNT_ID = 2;
-
-    private function activeAccountId(): int
+    private function authenticatedAccount(): Account
     {
-        return (int) (Auth::id() ?? self::TEST_ACCOUNT_ID);
+        $account = Auth::user();
+
+        abort_unless($account instanceof Account, 401);
+
+        return $account;
     }
 
-    private function activeAccount(): ?Account
-    {
-        return Auth::user() ?? Account::find(self::TEST_ACCOUNT_ID);
-    }
-
+    /**
+     * Display posts created by the authenticated account.
+     */
     public function index(): View
     {
-        $accountId = $this->activeAccountId();
-        $account = $this->activeAccount();
+        $account = $this->authenticatedAccount();
 
         $posts = Post::with('category')
-            ->where('account_id', $accountId)
+            ->where('account_id', $account->account_id)
             ->orderByDesc('date_created')
             ->get();
 
         return view('posts.my-posts', [
             'posts' => $posts,
-            'testingAccount' => $account,
         ]);
     }
 
+    /**
+     * Display the edit status page of a specific post.
+     */
     public function edit(int $id): View
     {
+        $account = $this->authenticatedAccount();
+
         $post = Post::with('category')
             ->where('post_id', $id)
-            ->where('account_id', $this->activeAccountId())
+            ->where('account_id', $account->account_id)
             ->firstOrFail();
 
         return view('posts.edit-post-status', [
             'post' => $post,
-            'testingAccount' => $this->activeAccount(),
         ]);
     }
 
+    /**
+     * Update the status of a post.
+     */
     public function updateStatus(Request $request, int $id): RedirectResponse
     {
         $validated = $request->validate([
             'status' => ['required', 'in:active,closed,completed'],
         ]);
 
+        $account = $this->authenticatedAccount();
+
         $post = Post::where('post_id', $id)
-            ->where('account_id', $this->activeAccountId())
+            ->where('account_id', $account->account_id)
             ->firstOrFail();
 
         $post->post_status = $validated['status'];
@@ -86,18 +93,25 @@ class CompetitionPostController extends Controller
             ->with('success', 'Status successfully updated');
     }
 
+    /**
+     * Display the Create Competition Post page.
+     */
     public function create(): View
     {
+        $this->authenticatedAccount();
+
         $categories = Category::query()
             ->orderBy('category_name')
             ->get();
 
         return view('posts.create', [
             'categories' => $categories,
-            'testingAccount' => $this->activeAccount(),
         ]);
     }
 
+    /**
+     * Store a new competition post.
+     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate(
@@ -130,15 +144,17 @@ class CompetitionPostController extends Controller
             ]
         );
 
-        $account = $this->activeAccount();
+        // Get the currently logged-in account.
+        $account = $this->authenticatedAccount();
 
-        if (! $account) {
+        // Upload the competition poster.
+        $posterPath = $request->file('poster')->store('posters', 'public');
+
+        if (! $posterPath) {
             return back()
                 ->withInput($request->except('poster'))
-                ->with('error', 'Akun pengguna tidak ditemukan. Silakan login kembali.');
+                ->with('error', 'Poster gagal diunggah. Silakan coba lagi.');
         }
-
-        $posterPath = $request->file('poster')->store('posters', 'public');
 
         try {
             DB::transaction(function () use ($validated, $posterPath, $account) {
@@ -159,7 +175,7 @@ class CompetitionPostController extends Controller
 
             return back()
                 ->withInput($request->except('poster'))
-                ->with('error', 'Postingan gagal disimpan. Periksa kembali koneksi database dan struktur tabel, lalu coba lagi.');
+                ->with('error', 'Postingan gagal disimpan. Silakan coba lagi.');
         }
 
         return redirect()

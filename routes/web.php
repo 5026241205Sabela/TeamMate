@@ -68,21 +68,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 Route::get('/posts/latest', [PostController::class, 'latest'])->name('posts.latest');
 
-// Competition Posts (create, my-posts, edit status)
-Route::get('/create-post', [CompetitionPostController::class, 'create'])
-    ->name('posts.create');
+// Competition Posts
+Route::middleware('auth')->group(function () {
+    Route::get('/create-post', [CompetitionPostController::class, 'create'])
+        ->name('posts.create');
 
-Route::post('/create-post', [CompetitionPostController::class, 'store'])
-    ->name('posts.store');
+    Route::post('/create-post', [CompetitionPostController::class, 'store'])
+        ->name('posts.store');
 
-Route::get('/my-posts', [CompetitionPostController::class, 'index'])
-    ->name('posts.index');
+    Route::get('/my-posts', [CompetitionPostController::class, 'index'])
+        ->name('posts.index');
 
-Route::get('/my-posts/{post}/edit', [CompetitionPostController::class, 'edit'])
-    ->name('posts.edit');
+    Route::get('/my-posts/{post}/edit', [CompetitionPostController::class, 'edit'])
+        ->name('posts.edit');
 
-Route::patch('/my-posts/{post}/status', [CompetitionPostController::class, 'updateStatus'])
-    ->name('posts.update-status');
+    Route::patch('/my-posts/{post}/status', [CompetitionPostController::class, 'updateStatus'])
+        ->name('posts.update-status');
+});
 
 // Join Requests
 Route::get('/join-requests', [JoinRequestController::class, 'index'])

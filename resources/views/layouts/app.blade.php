@@ -361,7 +361,7 @@
 </head>
 <body>
 @php
-    $currentAccount = auth()->user() ?? ($testingAccount ?? null);
+    $currentAccount = auth()->user();
     $accountName = $currentAccount?->full_name ?? 'Student Member';
     $notificationCount = 0;
 
