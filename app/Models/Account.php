@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\RoutesNotifications;
 
-class Account extends Authenticatable
+class Account extends Authenticatable implements MustVerifyEmail
 {
+    use RoutesNotifications;
+
     protected $table = 'accounts';
 
     protected $primaryKey = 'account_id';
@@ -23,9 +27,18 @@ class Account extends Authenticatable
         'password',
     ];
 
+    /**
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [
+            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

@@ -503,7 +503,7 @@
             <span>Home</span>
         </a>
 
-        <a href="#" class="nav-link" title="My Posts">
+        <a href="{{ route('posts.index') }}" class="nav-link" title="My Posts">
             <span class="nav-icon">▤</span>
             <span>My Posts</span>
         </a>
@@ -550,10 +550,20 @@
             </div>
         </div>
 
-        <a href="#" class="logout-link">
-            <span>⇥</span>
-            Logout
-        </a>
+        @auth
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="logout-link" style="background:none;border:0;cursor:pointer;font:inherit;padding:0;">
+                    <span>⇥</span>
+                    Logout
+                </button>
+            </form>
+        @else
+            <a href="{{ route('landing') }}" class="logout-link">
+                <span>⇥</span>
+                Back to Landing
+            </a>
+        @endauth
 
     </div>
 

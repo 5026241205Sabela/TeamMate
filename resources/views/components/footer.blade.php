@@ -1,28 +1,33 @@
-<footer class="bg-navy-900 text-slate-300">
-    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
+<footer class="border-t border-slate-200 bg-[#0b1528] text-slate-300">
+    <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-            <a href="{{ route('home') }}" class="inline-block text-[25px] font-bold tracking-tight text-white">
-                TeamMate<span class="text-sky-400">.</span>
+            <a href="{{ auth()->check() ? route('home') : route('landing') }}" aria-label="TeamMate Home">
+                <x-logo theme="dark" />
             </a>
-            <p class="mt-4 text-sm leading-relaxed">
-                Platform yang membantu mahasiswa menemukan anggota tim untuk kompetisi, lomba, dan kegiatan akademik.
+            <p class="mt-4 max-w-sm text-sm leading-relaxed text-slate-300">
+                Platform kolaborasi terverifikasi KTM yang mempertemukan mahasiswa lintas jurusan untuk membentuk tim kompetisi dan riset akademik.
             </p>
         </div>
 
         <div>
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Navigation</h3>
-            <ul class="mt-4 space-y-2 text-sm">
-                <li><a href="{{ route('home') }}" class="hover:text-sky-300">Home</a></li>
-                <li><a href="{{ route('home') }}#about" class="hover:text-sky-300">About</a></li>
-                <li><a href="{{ route('home') }}#features" class="hover:text-sky-300">Features</a></li>
+            <h3 class="text-xs font-semibold tracking-wider text-sky-300 uppercase">Navigation</h3>
+            <ul class="mt-4 space-y-2.5 text-sm">
+                <li><a href="{{ route('landing') }}" class="transition-colors hover:text-white">Home</a></li>
+                <li><a href="{{ route('landing') }}#features" class="transition-colors hover:text-white">Features</a></li>
+                <li><a href="{{ route('landing') }}#about" class="transition-colors hover:text-white">About</a></li>
             </ul>
         </div>
 
         <div>
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Account</h3>
-            <ul class="mt-4 space-y-2 text-sm">
-                <li><a href="{{ route('login') }}" class="hover:text-sky-300">Login</a></li>
-                <li><a href="{{ route('register') }}" class="hover:text-sky-300">Register</a></li>
+            <h3 class="text-xs font-semibold tracking-wider text-sky-300 uppercase">Account</h3>
+            <ul class="mt-4 space-y-2.5 text-sm">
+                @auth
+                    <li><a href="{{ route('home') }}" class="transition-colors hover:text-white">Home Page</a></li>
+                    <li><a href="{{ route('posts.create') }}" class="transition-colors hover:text-white">Create Post</a></li>
+                @else
+                    <li><a href="{{ route('login') }}" class="transition-colors hover:text-white">Login</a></li>
+                    <li><a href="{{ route('register') }}" class="transition-colors hover:text-white">Register</a></li>
+                @endauth
             </ul>
         </div>
     </div>
@@ -31,4 +36,3 @@
         &copy; {{ date('Y') }} TeamMate. All rights reserved.
     </div>
 </footer>
-

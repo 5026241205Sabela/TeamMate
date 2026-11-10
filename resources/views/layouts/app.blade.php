@@ -1,40 +1,26 @@
-{{-- <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title>@yield('title', 'Find Your Perfect Teammates') | TeamMate</title>
-
-        @fonts
-
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
-        <x-navbar />
-
-        <main class="flex-1">
-            @yield('content')
-        </main>
-
-        <x-footer />
-    </body>
-</html> --}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TeamMate')</title>
+
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+
+    @fonts
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         :root {
-            --navy: #0d1729;
-            --navy-border: #202b3e;
+            --navy: #0b1528;
+            --navy-border: #1e2d47;
             --blue: #2160f5;
-            --page: #f5f7fb;
+            --page: #f6f8fc;
             --text: #172033;
             --muted: #8b98ad;
-            --line: #e6ebf2;
+            --line: #e2e8f0;
         }
 
         * { box-sizing: border-box; }
@@ -42,7 +28,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: var(--font-sans);
             color: var(--text);
             background: var(--page);
         }
@@ -52,79 +38,91 @@
         .sidebar {
             position: fixed;
             inset: 0 auto 0 0;
-            z-index: 10;
+            z-index: 20;
             display: flex;
             flex-direction: column;
             width: 256px;
             color: #fff;
             background: var(--navy);
+            border-right: 1px solid var(--navy-border);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 11px;
-            min-height: 85px;
-            padding: 0 24px;
+            min-height: 80px;
+            padding: 0 22px;
             border-bottom: 1px solid var(--navy-border);
-            font-size: 20px;
-            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
         }
 
-        .brand-mark {
-            display: grid;
-            place-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 9px;
-            background: #3280ff;
-            font-size: 18px;
-        }
-
-        .sidebar-nav { padding: 19px 12px; }
+        .sidebar-nav { padding: 18px 12px; }
 
         .create-link {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 9px;
-            margin: 0 4px 15px;
+            margin: 0 4px 16px;
             padding: 12px;
-            border-radius: 13px;
+            border-radius: 12px;
             color: white;
             background: var(--blue);
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
+            transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms, box-shadow 180ms;
         }
 
-        .nav-link {
+        .create-link:hover {
+            background: #1b52d4;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px -8px rgba(33, 96, 245, 0.65);
+        }
+
+        .create-link:active {
+            transform: scale(0.97);
+        }
+
+        .sidebar-nav .nav-link {
             display: flex;
             align-items: center;
-            gap: 13px;
-            margin: 5px 0;
-            padding: 12px 13px;
-            border-radius: 12px;
+            gap: 12px;
+            margin: 4px 0;
+            padding: 11px 13px;
+            border-radius: 11px;
             color: #9aa8bd;
             text-decoration: none;
             font-size: 14px;
+            font-weight: 500;
+            transition: background-color 180ms, color 180ms;
         }
 
-        .nav-link.active {
+        .sidebar-nav .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-nav .nav-link.active {
             color: white;
             background: var(--blue);
+            font-weight: 600;
         }
 
         .nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 18px;
-            text-align: center;
-            font-size: 17px;
+            height: 18px;
+            flex-shrink: 0;
         }
 
         .nav-spacer { flex: 1; }
 
         .profile-block {
-            padding: 22px 16px 25px;
+            padding: 20px 16px 24px;
             border-top: 1px solid var(--navy-border);
         }
 
@@ -132,30 +130,42 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .avatar {
             display: grid;
             place-items: center;
-            flex: 0 0 34px;
-            width: 34px;
-            height: 34px;
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             color: white;
-            background: #079b72;
+            background: #0284c7;
             font-size: 12px;
             font-weight: 700;
         }
 
-        .profile-name { font-size: 13px; line-height: 1.5; }
-        .profile-meta { color: #91a0b5; font-size: 12px; }
+        .profile-name { font-size: 13px; line-height: 1.4; font-weight: 600; color: #fff; }
+        .profile-meta { color: #91a0b5; font-size: 12px; margin-top: 2px; }
 
         .logout-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+            border: 0;
+            background: transparent;
             color: #9aa8bd;
             text-decoration: none;
-            font-size: 14px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 150ms;
         }
+
+        .logout-link:hover { color: #fff; }
 
         .main-content {
             min-height: 100vh;
@@ -163,25 +173,28 @@
         }
 
         .page-header {
-            padding: 25px 32px 23px;
+            padding: 24px 32px 22px;
             background: #fff;
+            border-bottom: 1px solid var(--line);
         }
 
         .page-header h1 {
-            margin: 0 0 7px;
+            margin: 0 0 6px;
             font-size: 25px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
             line-height: 1.25;
         }
 
         .page-header p {
             margin: 0;
-            color: #71819b;
+            color: #64748b;
             font-size: 14px;
         }
 
         .page-body {
             width: 100%;
-            max-width: 1050px;
+            max-width: 1120px;
             margin: 0 auto;
             padding: 32px;
         }
@@ -191,6 +204,7 @@
             padding: 25px 24px 27px;
             border-radius: 17px;
             background: #fff;
+            border: 1px solid var(--line);
         }
 
         .field-label {
@@ -331,38 +345,80 @@
     @stack('styles')
 </head>
 <body>
+@php
+    $currentAccount = auth()->user() ?? ($testingAccount ?? null);
+    $accountName = $currentAccount?->full_name ?? 'Student Member';
+    $initials = collect(explode(' ', trim($accountName)))
+        ->filter()
+        ->take(2)
+        ->map(fn (string $part) => mb_strtoupper(mb_substr($part, 0, 1)))
+        ->implode('') ?: 'TM';
+@endphp
+
 <div class="app-shell">
     <aside class="sidebar">
-        <div class="brand">
-            <span class="brand-mark">♧</span>
-            <span>TeamMate</span>
-        </div>
+        <a class="brand" href="{{ route('home') }}" aria-label="TeamMate Home">
+            <x-logo theme="dark" />
+        </a>
 
-        <nav class="sidebar-nav">
+        <nav class="sidebar-nav" aria-label="Sidebar Navigation">
             <a class="create-link" href="{{ route('posts.create') }}">
-                <span>＋</span> Create Post
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                </svg>
+                <span>Create Post</span>
             </a>
-            <a class="nav-link" href="{{ route('home') }}"><span class="nav-icon">⌂</span> Home</a>
-            {{-- These navigation destinations can be connected when their pages are ready. --}}
-            <a class="nav-link" href="{{ route('posts.index') }}">
-                <span class="nav-icon">â–¤</span> My Posts
+
+            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1v-9.5z" />
+                </svg>
+                <span>Home</span>
             </a>
-            <a class="nav-link" href="#"><span class="nav-icon">♧</span> Requests</a>
-            <a class="nav-link" href="#"><span class="nav-icon">♧</span> Notifications</a>
-            <a class="nav-link" href="#"><span class="nav-icon">♙</span> Profile</a>
+
+            <a class="nav-link {{ request()->routeIs('posts.index', 'posts.edit') ? 'active' : '' }}" href="{{ route('posts.index') }}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="4" y="4" width="16" height="16" rx="2.5" />
+                    <path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5" />
+                </svg>
+                <span>My Posts</span>
+            </a>
+
+            <a class="nav-link {{ request()->routeIs('join-requests.*') ? 'active' : '' }}" href="{{ route('join-requests.index') }}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6M16 11h6" />
+                </svg>
+                <span>Requests</span>
+            </a>
         </nav>
 
         <div class="nav-spacer"></div>
 
         <div class="profile-block">
             <div class="profile">
-                <div class="avatar">SD</div>
+                <div class="avatar">{{ $initials }}</div>
                 <div>
-                    <div class="profile-name">{{ $testingAccount?->full_name ?? 'Testing Account' }}</div>
-                    <div class="profile-meta">{{ $testingAccount?->nim ?? 'Temporary account' }}</div>
+                    <div class="profile-name">{{ $accountName }}</div>
+                    <div class="profile-meta">{{ $currentAccount?->nim ?? $currentAccount?->email ?? 'Active Member' }}</div>
                 </div>
             </div>
-            <a class="logout-link" href="{{ route('home') }}">⇥ &nbsp; Logout</a>
+            @auth
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="logout-link">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            @else
+                <a class="logout-link" href="{{ route('landing') }}">
+                    <span>Back to Landing</span>
+                </a>
+            @endauth
         </div>
     </aside>
 

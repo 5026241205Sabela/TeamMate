@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="tm-logo-title">
+  <title id="tm-logo-title">TeamMate mark</title>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="#0B1528"/>
+  <path fill="#FFFFFF" d="M56 64 H200 V104 H148 V200 H108 V104 H56 Z"/>
+  <path fill="#38BDF8" d="M56 128 H92 V200 H56 Z M164 128 H200 V200 H164 Z"/>
+</svg>
+

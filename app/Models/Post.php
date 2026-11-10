@@ -27,6 +27,15 @@ class Post extends Model
         'deletion_schedule',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'date_created' => 'datetime',
+            'status_change_time' => 'datetime',
+            'deletion_schedule' => 'datetime',
+        ];
+    }
+
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'account_id', 'account_id');

@@ -1,44 +1,68 @@
-
 <?php
 
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CompetitionPostController;
 use App\Http\Controllers\JoinRequestController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'landing')->name('home');
+Route::get('/', function () {
+    if (Auth::check()) {
+        return to_route('home');
+    }
 
-Route::get('/register', [RegisterController::class, 'create'])->name('register');
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+    return view('landing');
+})->name('landing');
 
-Route::get('/login', [LoginController::class, 'create'])->name('login');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [RegisterController::class, 'create'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('register.store');
 
-Route::get('/forgot-password', [LoginController::class, 'forgotPassword'])->name('password.request');
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('login.store');
 
-// route untuk create competition post (sabel)
+    Route::get('/forgot-password', [LoginController::class, 'forgotPassword'])->name('password.request');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/home', [PostController::class, 'home'])->name('home');
+
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware('signed')
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+});
+
+Route::get('/posts/latest', [PostController::class, 'latest'])->name('posts.latest');
+
+// Competition Posts (create, my-posts, edit status)
 Route::get('/create-post', [CompetitionPostController::class, 'create'])
     ->name('posts.create');
 
 Route::post('/create-post', [CompetitionPostController::class, 'store'])
     ->name('posts.store');
 
-// Route untuk menampilkan postingan milik user
 Route::get('/my-posts', [CompetitionPostController::class, 'index'])
     ->name('posts.index');
 
-// Route untuk menampilkan form edit status postingan
 Route::get('/my-posts/{post}/edit', [CompetitionPostController::class, 'edit'])
     ->name('posts.edit');
 
-// Route untuk menyimpan perubahan status postingan
 Route::patch('/my-posts/{post}/status', [CompetitionPostController::class, 'updateStatus'])
     ->name('posts.update-status');
-
-// Route fitur edit post status (punyamu)
-Route::view('/edit-post-status', 'posts.edit-post-status');
 
 // Join Requests
 Route::get('/join-requests', [JoinRequestController::class, 'index'])

@@ -13,23 +13,127 @@
     --color-navy-700: #1c3566;
     --color-navy-800: #152a52;
     --color-navy-900: #0f1f3d;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Browser surfaces themed from the palette. */
+@layer base {
+    html {
+        scrollbar-color: var(--color-navy-100) transparent;
+    }
+
+    ::selection {
+        background: var(--color-sky-200);
+        color: var(--color-navy-900);
+    }
+
+    input,
+    textarea {
+        caret-color: var(--color-sky-600);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-sky-500);
+        outline-offset: 2px;
+    }
 }
 
 @layer components {
     .nav-link {
-        @apply rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-navy-50 hover:text-navy-900 md:p-0 md:hover:bg-transparent;
+        @apply rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-navy-50 hover:text-navy-900 md:p-0 md:hover:bg-transparent;
+    }
+
+    /* Buttons: lift on hover, press on click, ink ripple from the pointer. */
+    .btn-primary,
+    .btn-secondary {
+        @apply relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-2.5 text-sm font-semibold select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200;
+        transition:
+            translate 200ms var(--ease-out-expo),
+            scale 120ms var(--ease-out-expo),
+            background-color 200ms,
+            border-color 200ms,
+            box-shadow 200ms;
     }
 
     .btn-primary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-navy-700 hover:shadow-md focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200;
+        @apply bg-navy-900 text-white shadow-sm hover:-translate-y-0.5 hover:bg-navy-700 hover:shadow-md;
     }
 
     .btn-secondary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-5 py-2.5 text-sm font-semibold text-navy-900 transition hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200;
+        @apply border border-sky-200 bg-sky-50 text-navy-900 hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-100;
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active {
+        translate: 0 0;
+        scale: 0.96;
+        transition-duration: 80ms;
+    }
+
+    .btn-primary::after,
+    .btn-secondary::after {
+        content: '';
+        position: absolute;
+        left: var(--rx, 50%);
+        top: var(--ry, 50%);
+        width: 10px;
+        height: 10px;
+        margin: -5px 0 0 -5px;
+        border-radius: 9999px;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .btn-primary.is-rippling::after,
+    .btn-secondary.is-rippling::after {
+        animation: ink 560ms ease-out;
+    }
+
+    /* Submit in progress: spinner replaces the idle state and blocks double submits. */
+    .btn-primary[aria-busy='true'],
+    .btn-secondary[aria-busy='true'] {
+        pointer-events: none;
+        opacity: 0.85;
+    }
+
+    .btn-primary[aria-busy='true']::before,
+    .btn-secondary[aria-busy='true']::before {
+        content: '';
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 9999px;
+        animation: spin-ring 700ms linear infinite;
     }
 
     .card {
         @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm;
+    }
+
+    /* Clickable-feeling card: rises on hover, settles on press. */
+    .card-interactive {
+        transition:
+            translate 260ms var(--ease-out-expo),
+            scale 120ms var(--ease-out-expo),
+            box-shadow 260ms,
+            border-color 260ms;
+    }
+
+    @media (hover: hover) {
+        .card-interactive:hover {
+            translate: 0 -4px;
+            border-color: var(--color-sky-300);
+            box-shadow: 0 14px 28px -14px rgb(15 31 61 / 0.28);
+        }
+    }
+
+    .card-interactive:active {
+        translate: 0 -1px;
+        scale: 0.985;
+        transition-duration: 90ms;
     }
 
     .form-input {
@@ -45,6 +149,147 @@
     }
 
     .text-link {
-        @apply font-semibold text-sky-600 transition hover:text-navy-900 hover:underline;
+        @apply font-semibold text-sky-700 transition-colors hover:text-navy-900 hover:underline;
+    }
+
+    /* Skeleton placeholder with a travelling shimmer. */
+    .skeleton {
+        border-radius: 0.5rem;
+        background-color: var(--color-slate-200);
+        background-image: linear-gradient(
+            100deg,
+            transparent 30%,
+            rgb(255 255 255 / 0.65) 50%,
+            transparent 70%
+        );
+        background-size: 200% 100%;
+        background-repeat: no-repeat;
+        animation: shimmer 1.4s ease-in-out infinite;
+    }
+
+    /* Items that arrive after loading (e.g. fetched cards) rise in one after another. */
+    .reveal-in {
+        animation: reveal-in 480ms var(--ease-out-expo) backwards;
+        animation-delay: calc(var(--i, 0) * 70ms);
+    }
+
+    /* Hero focal moment: open team slots fill up one by one. */
+    .slot-pop {
+        animation: slot-pop 520ms var(--ease-out-expo) backwards;
+        animation-delay: calc(500ms + var(--i, 0) * 160ms);
+    }
+
+    .slot-fill {
+        transform-origin: left center;
+        transform: scaleX(var(--fill, 0.6));
+        animation: slot-fill 900ms var(--ease-out-expo) 500ms backwards;
+    }
+
+    /* Feature rows: hairline list that nudges on hover instead of repeating cards. */
+    .feature-row {
+        transition: padding-left 260ms var(--ease-out-expo), background-color 260ms;
+    }
+
+    @media (hover: hover) {
+        .feature-row:hover {
+            padding-left: 1rem;
+            background-color: var(--color-sky-50);
+        }
+    }
+}
+
+@keyframes ink {
+    from {
+        opacity: 0.28;
+        transform: scale(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(36);
+    }
+}
+
+@keyframes spin-ring {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shimmer {
+    from {
+        background-position: 150% 0;
+    }
+    to {
+        background-position: -50% 0;
+    }
+}
+
+@keyframes reveal-in {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+}
+
+@keyframes slot-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+}
+
+@keyframes slot-fill {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+/* Reduced motion: drop movement, keep state and feedback legible. */
+@media (prefers-reduced-motion: reduce) {
+    .btn-primary,
+    .btn-secondary,
+    .card-interactive,
+    .feature-row {
+        transition-property: background-color, border-color, box-shadow;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .card-interactive:hover {
+        translate: 0 0;
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active,
+    .card-interactive:active {
+        scale: 1;
+    }
+
+    .btn-primary.is-rippling::after,
+    .btn-secondary.is-rippling::after,
+    .slot-pop,
+    .slot-fill {
+        animation: none;
+    }
+
+    .reveal-in {
+        animation: reveal-fade 300ms ease-out backwards;
+        animation-delay: 0ms;
+    }
+
+    .skeleton {
+        animation: none;
+        background-image: none;
+    }
+
+    .btn-primary[aria-busy='true']::before,
+    .btn-secondary[aria-busy='true']::before {
+        animation-duration: 1.6s;
+    }
+}
+
+@keyframes reveal-fade {
+    from {
+        opacity: 0;
     }
 }

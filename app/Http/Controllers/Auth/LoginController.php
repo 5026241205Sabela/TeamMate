@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -18,16 +21,39 @@ class LoginController extends Controller
     }
 
     /**
-     * Validate the login credentials.
+     * Authenticate the account against the accounts table.
      *
-     * Full authentication is intentionally not implemented yet until the team
-     * agrees on the database structure.
+     * @throws ValidationException
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        return back()
-            ->withInput($request->only('email', 'remember'))
-            ->with('info', 'Login is not available yet. Authentication will be enabled once the account system is ready.');
+        $credentials = [
+            'email' => mb_strtolower(trim($request->string('email')->toString())),
+            'password' => $request->string('password')->toString(),
+        ];
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'email' => 'Email atau password salah. Silakan coba lagi.',
+            ]);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('home'));
+    }
+
+    /**
+     * Log the account out and invalidate the session.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return to_route('landing');
     }
 
     /**
