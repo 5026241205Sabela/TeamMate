@@ -3,6 +3,10 @@
 @section('content')
     @php
         $openRegisterTab = request()->query('tab') === 'register'
+            || old('name') !== null
+            || old('student_id') !== null
+            || old('university') !== null
+            || old('phone') !== null
             || $errors->hasAny(['name', 'phone', 'university', 'student_id', 'ktm', 'password_confirmation']);
     @endphp
 

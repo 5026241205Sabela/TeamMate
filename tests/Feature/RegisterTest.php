@@ -124,3 +124,25 @@ test('ktm may not be larger than 2 MB', function () {
         'ktm' => UploadedFile::fake()->create('ktm.pdf', 3000, 'application/pdf'),
     ]))->assertSessionHasErrors('ktm');
 });
+
+test('an account rejected by admin can register again with the same email and nim', function () {
+    $rejected = makeAccount([
+        'full_name' => 'Ilham',
+        'email' => 'ilham@student.test',
+        'nim' => '283993884',
+        'verification_status' => 'rejected',
+        'rejection_reason' => 'NIM pada formulir tidak sesuai dengan foto KTM.',
+    ], verified: false);
+
+    $this->post(route('register.store'), validRegistrationData([
+        'name' => 'Ilham Perbaikan',
+        'email' => 'ilham@student.test',
+        'student_id' => '221220001',
+    ]))->assertRedirect(route('verification.notice'));
+
+    $updated = $rejected->fresh();
+    expect($updated->full_name)->toBe('Ilham Perbaikan')
+        ->and($updated->nim)->toBe('221220001')
+        ->and($updated->verification_status)->toBe('pending')
+        ->and($updated->rejection_reason)->toBeNull();
+});

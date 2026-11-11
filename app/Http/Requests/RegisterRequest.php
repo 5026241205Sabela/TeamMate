@@ -37,10 +37,26 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(Account::class, 'email')],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(Account::class, 'email')->where(
+                    fn ($query) => $query->where('verification_status', '!=', 'rejected')
+                ),
+            ],
             'phone' => ['required', 'string', 'regex:/^\+?[0-9]{9,15}$/'],
             'university' => ['required', 'string', 'max:255'],
-            'student_id' => ['required', 'string', 'alpha_num', 'max:30', Rule::unique(Account::class, 'nim')],
+            'student_id' => [
+                'required',
+                'string',
+                'alpha_num',
+                'max:30',
+                Rule::unique(Account::class, 'nim')->where(
+                    fn ($query) => $query->where('verification_status', '!=', 'rejected')
+                ),
+            ],
             'ktm' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
         ];

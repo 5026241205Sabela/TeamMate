@@ -89,10 +89,16 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('logout') }}" class="mt-6 text-center">
-                    @csrf
-                    <button type="submit" class="btn-primary w-full py-3">Keluar &amp; Kembali ke Halaman Utama</button>
-                </form>
+                <div class="mt-6 space-y-3 text-center">
+                    <a href="{{ route('landing', ['tab' => 'register']) }}" class="btn-primary block w-full py-3">
+                        Daftar Ulang dengan Data yang Benar
+                    </a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-link text-sm">Keluar ke Halaman Utama</button>
+                    </form>
+                </div>
             @else
                 <div class="text-center">
                     <span class="mx-auto flex size-14 items-center justify-center rounded-full bg-sky-100 text-navy-900">

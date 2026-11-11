@@ -168,9 +168,17 @@
                                             <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-900">
                                                 Email Terverifikasi
                                             </span>
-                                        @else
+                                        @elseif ($status === 'approved')
                                             <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
                                                 Menunggu Klik Link Email
+                                            </span>
+                                        @elseif ($status === 'rejected')
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+                                                Email Penolakan Terkirim
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                                                Belum Dikirim Email
                                             </span>
                                         @endif
                                     </div>

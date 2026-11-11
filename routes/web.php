@@ -19,6 +19,14 @@ Route::get('/', function () {
             return to_route('admin.verifications.index');
         }
 
+        if ($account->isRejectedByAdmin() && request()->query('tab') === 'register') {
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+
+            return view('landing');
+        }
+
         if (! $account->isApprovedByAdmin() || ! $account->hasVerifiedEmail()) {
             return to_route('verification.notice');
         }
