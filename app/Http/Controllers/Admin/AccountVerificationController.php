@@ -76,6 +76,13 @@ class AccountVerificationController extends Controller
         $account->email_verified_at = null;
         $account->save();
 
+        if (config('mail.default') === 'log') {
+            return back()->with(
+                'info',
+                "Data {$account->full_name} telah disetujui, tetapi email TIDAK terkirim karena MAIL_MAILER di .env server ini masih \"".config('mail.default').'". Ubah ke MAIL_MAILER=smtp dan isi MAIL_USERNAME serta MAIL_PASSWORD (Gmail App Password), lalu minta mahasiswa klik "Kirim ulang link".'
+            );
+        }
+
         try {
             $account->sendEmailVerificationNotification();
         } catch (Throwable $exception) {

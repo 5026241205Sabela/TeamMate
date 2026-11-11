@@ -48,11 +48,33 @@ test('authenticated accounts see the homepage with sidebar, filter and shimmer s
         ->assertDontSee('Verifikasi email kamu');
 });
 
-test('the homepage reminds unverified accounts to verify their email', function () {
+test('unverified accounts cannot open the homepage and are sent to the verification page', function () {
     $this->actingAs(makeAccount(verified: false))
         ->get(route('home'))
-        ->assertOk()
-        ->assertSee('Verifikasi email kamu');
+        ->assertRedirect(route('verification.notice'));
+});
+
+test('accounts pending or rejected by admin cannot open the homepage even with a verified email', function () {
+    $this->actingAs(makeAccount(['verification_status' => 'pending']))
+        ->get(route('home'))
+        ->assertRedirect(route('verification.notice'));
+
+    $this->actingAs(makeAccount(['email' => 'rejected@student.test', 'nim' => '5026241999', 'verification_status' => 'rejected']))
+        ->get(route('home'))
+        ->assertRedirect(route('verification.notice'));
+});
+
+test('unverified accounts cannot open competition pages', function () {
+    $this->actingAs(makeAccount(verified: false))
+        ->get(route('posts.create'))
+        ->assertRedirect(route('verification.notice'));
+});
+
+test('unverified accounts are sent to the verification page after logging in', function () {
+    makeAccount(['email' => 'unverified@student.test', 'nim' => '5026241888'], verified: false);
+
+    $this->post(route('login.store'), ['email' => 'unverified@student.test', 'password' => 'Password123'])
+        ->assertRedirect(route('verification.notice'));
 });
 
 test('the feed lists only active posts, newest first', function () {

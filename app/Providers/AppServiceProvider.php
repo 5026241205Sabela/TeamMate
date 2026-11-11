@@ -25,6 +25,17 @@ class AppServiceProvider extends ServiceProvider
             @set_time_limit(120);
         }
 
+        $this->app['url']->setKeyResolver(function (): array {
+            $sharedKey = 'base64:UzlPsHVzWRRmAl8yyiJ9X/bkZsyBvKHa34pXmIL1u5g=';
+            $appKey = (string) config('app.key', $sharedKey);
+
+            return array_values(array_unique(array_filter([
+                $sharedKey,
+                $appKey,
+                ...(config('app.previous_keys') ?? []),
+            ])));
+        });
+
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
             return (new MailMessage)
                 ->subject('Verifikasi email akun TeamMate kamu')

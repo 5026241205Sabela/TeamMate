@@ -48,7 +48,7 @@ class LoginController extends Controller
             return redirect()->intended(route('admin.verifications.index'));
         }
 
-        if ($account->isPendingAdminVerification() || $account->isRejectedByAdmin()) {
+        if (! $account->isApprovedByAdmin() || ! $account->hasVerifiedEmail()) {
             return to_route('verification.notice');
         }
 

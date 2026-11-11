@@ -14,7 +14,15 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => (static function (): string {
+        $mailer = (string) env('MAIL_MAILER', 'smtp');
+
+        if (env('APP_ENV') !== 'testing' && ($mailer === '' || $mailer === 'log')) {
+            return 'smtp';
+        }
+
+        return $mailer;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,12 +47,12 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            'scheme' => env('MAIL_SCHEME', 'smtp'),
             'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT', 587),
+            'username' => env('MAIL_USERNAME') ?: 'teammatee123@gmail.com',
+            'password' => env('MAIL_PASSWORD') ?: 'jypeumiboheswxhi',
             'timeout' => (int) env('MAIL_TIMEOUT', 60),
             'source_ip' => env('MAIL_SOURCE_IP', '0.0.0.0'),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
@@ -112,8 +120,16 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+        'address' => (static function (): string {
+            $from = (string) env('MAIL_FROM_ADDRESS', '');
+
+            if ($from === '' || $from === 'hello@example.com') {
+                return 'teammatee123@gmail.com';
+            }
+
+            return $from;
+        })(),
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'TeamMate')),
     ],
 
 ];

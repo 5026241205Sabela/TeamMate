@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Throwable;
 
 class EmailVerificationController extends Controller
 {
@@ -34,6 +35,10 @@ class EmailVerificationController extends Controller
      */
     public function verify(Request $request, int $id, string $hash): RedirectResponse
     {
+        if (! $request->hasValidSignature() && ! $request->hasValidSignature(false)) {
+            abort(403, 'Link verifikasi tidak valid atau sudah kedaluwarsa.');
+        }
+
         $account = Account::findOrFail($id);
 
         if (! hash_equals(sha1($account->getEmailForVerification()), $hash)) {
@@ -71,7 +76,17 @@ class EmailVerificationController extends Controller
             return to_route('home');
         }
 
-        $account->sendEmailVerificationNotification();
+        if (config('mail.default') === 'log') {
+            return back()->with('info', 'Email tidak dapat dikirim karena MAIL_MAILER di file .env server ini masih "'.config('mail.default').'". Ubah ke MAIL_MAILER=smtp lalu isi MAIL_USERNAME dan MAIL_PASSWORD (Gmail App Password).');
+        }
+
+        try {
+            $account->sendEmailVerificationNotification();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->with('info', 'Link verifikasi gagal dikirim: '.$exception->getMessage());
+        }
 
         return back()->with('success', 'Link verifikasi baru sudah dikirim. Periksa inbox atau folder spam kamu.');
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAccountIsAdmin;
+use App\Http\Middleware\EnsureAccountIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             : route('home'));
         $middleware->alias([
             'admin' => EnsureAccountIsAdmin::class,
+            'account.verified' => EnsureAccountIsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
