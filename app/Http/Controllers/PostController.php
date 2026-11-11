@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class PostController extends Controller
@@ -53,11 +53,9 @@ class PostController extends Controller
     }
 
     /**
-     * Fetch the latest active recruitment posts with optional keyword and category filters.
-     *
-     * @return Collection<int, Post>
+     * Fetch active recruitment posts with optional filters and pagination.
      */
-    private function queryActivePosts(string $keyword = '', int $categoryId = 0): Collection
+    private function queryActivePosts(string $keyword = '', int $categoryId = 0): LengthAwarePaginator
     {
         return Post::query()
             ->with(['account:account_id,full_name,university', 'category:category_id,category_name'])
@@ -72,7 +70,8 @@ class PostController extends Controller
                 });
             })
             ->latest('date_created')
-            ->limit(12)
-            ->get();
+            ->orderByDesc('post_id')
+            ->paginate(9)
+            ->withQueryString();
     }
 }

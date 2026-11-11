@@ -9,7 +9,7 @@
             <p>Browse active competition posts and connect with students looking for teammates.</p>
         </div>
         <div class="sm:text-right">
-            <strong class="block text-2xl leading-tight font-bold text-navy-900 tabular-nums">{{ $posts->count() }}</strong>
+            <strong class="block text-2xl leading-tight font-bold text-navy-900 tabular-nums">{{ $posts->total() }}</strong>
             <small class="text-xs text-slate-500">Active posts</small>
         </div>
     </header>
