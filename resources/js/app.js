@@ -147,6 +147,12 @@ const updateCount = () => {
                 headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest' },
             });
 
+            if (response.redirected && new URL(response.url).pathname === '/login') {
+                window.location.assign(response.url);
+
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error(`Feed request failed with ${response.status}`);
             }
@@ -236,42 +242,4 @@ const updateCount = () => {
     } else {
         loadFeed();
     }
-}
-
-/**
- * Post detail modal on the homepage.
- */
-const postModal = document.querySelector('[data-post-modal]');
-
-if (postModal) {
-    const closeModal = () => {
-        postModal.hidden = true;
-    };
-
-    document.addEventListener('click', (event) => {
-        const card = event.target.closest('[data-post-card]');
-
-        if (card && !event.target.closest('a')) {
-            postModal.querySelector('[data-modal-category]').textContent = card.dataset.postCategory || 'Umum';
-            postModal.querySelector('[data-modal-title]').textContent = card.dataset.postTitle || '';
-            postModal.querySelector('[data-modal-meta]').textContent =
-                `Diposting oleh ${card.dataset.postAuthor} (${card.dataset.postUniversity}) · ${card.dataset.postTime}`;
-            postModal.querySelector('[data-modal-description]').textContent = card.dataset.postDescription || '';
-            postModal.querySelector('[data-modal-criteria]').textContent = card.dataset.postCriteria || '';
-            postModal.querySelector('[data-modal-report]').setAttribute('href', card.dataset.postReportUrl || '#');
-            postModal.hidden = false;
-
-            return;
-        }
-
-        if (event.target.closest('[data-modal-close]') || event.target === postModal) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !postModal.hidden) {
-            closeModal();
-        }
-    });
 }

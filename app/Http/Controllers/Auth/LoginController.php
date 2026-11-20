@@ -28,14 +28,17 @@ class LoginController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $credentials = [
-            'email' => mb_strtolower(trim($request->string('email')->toString())),
-            'password' => $request->string('password')->toString(),
-        ];
+        $identifier = trim($request->string('login')->toString());
+        $password = $request->string('password')->toString();
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
+
+        $credentials = $isEmail
+            ? ['email' => mb_strtolower($identifier), 'password' => $password]
+            : ['nim' => $identifier, 'password' => $password];
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'email' => 'Email atau password salah. Silakan coba lagi.',
+                'login' => 'NIM/Email atau password salah. Silakan coba lagi.',
             ]);
         }
 

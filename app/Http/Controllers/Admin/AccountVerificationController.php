@@ -73,7 +73,11 @@ class AccountVerificationController extends Controller
 
         $account->verification_status = 'approved';
         $account->rejection_reason = null;
-        $account->email_verified_at = null;
+
+        if (! $account->hasVerifiedEmail()) {
+            $account->email_verified_at = null;
+        }
+
         $account->save();
 
         if (config('mail.default') === 'log') {

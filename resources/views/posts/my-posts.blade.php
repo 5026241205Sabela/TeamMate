@@ -75,14 +75,29 @@
                             } }}
                         </strong>
                     </span>
+
+                    @if ($post->post_status === 'completed' && $post->deletion_schedule)
+                        <p style="margin: 6px 0 0; color: #2160f5; font-size: 12px;">
+                            Terhapus otomatis pada {{ $post->deletion_schedule->format('d M Y, H:i') }}
+                        </p>
+                    @endif
                 </div>
 
-                <a
-                    href="{{ route('posts.edit', $post->post_id) }}"
-                    class="btn btn-primary"
-                >
-                    Edit
-                </a>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a
+                        href="{{ route('posts.show', $post->post_id) }}"
+                        class="btn"
+                    >
+                        View Detail
+                    </a>
+
+                    <a
+                        href="{{ route('posts.edit', $post->post_id) }}"
+                        class="btn btn-primary"
+                    >
+                        Edit
+                    </a>
+                </div>
 
             </div>
         @endforeach

@@ -39,6 +39,7 @@ class ReportController extends Controller
         $post->reports()->create([
             'reason' => $validated['reason'],
             'description' => $validated['description'],
+            'report_status' => 'pending',
         ]);
 
         return redirect()

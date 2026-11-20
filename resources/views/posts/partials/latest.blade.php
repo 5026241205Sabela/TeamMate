@@ -14,18 +14,9 @@
     @endphp
 
     <article
-        class="card card-interactive reveal-in flex h-full cursor-pointer flex-col overflow-hidden p-0"
+        class="card card-interactive reveal-in flex h-full flex-col overflow-hidden p-0"
         style="--i: {{ $loop->index }}"
         data-post-card
-        data-post-id="{{ $post->post_id }}"
-        data-post-title="{{ $post->title }}"
-        data-post-category="{{ $categoryName }}"
-        data-post-author="{{ $authorName }}"
-        data-post-university="{{ $universityName }}"
-        data-post-time="{{ $postedTime }}"
-        data-post-description="{{ $post->description ?? 'No additional description provided.' }}"
-        data-post-criteria="{{ $post->member_criteria ?? 'Open to committed students from any major.' }}"
-        data-post-report-url="{{ route('reports.create', $post->post_id) }}"
     >
         {{-- Uniform 16:9 / h-40 Poster / Cover Header --}}
         <div class="relative flex h-40 w-full shrink-0 flex-col justify-between overflow-hidden border-b border-slate-100 bg-slate-100 p-4">
@@ -96,27 +87,27 @@
                 <div class="mt-3.5 grid grid-cols-2 gap-2">
 
                     {{-- VIEW DETAILS --}}
-                    <button
-                        type="button"
-                        data-open-post-detail
+                    <a
+                        href="{{ route('posts.show', $post->post_id) }}"
                         class="btn btn-primary w-full px-2 py-2 text-xs"
                     >
                         View Details
-                    </button>
+                    </a>
 
                     {{-- APPLY / MY POST --}}
                     @if ((int) auth()->id() === (int) $post->account_id)
 
-                        <span
+                        <a
+                            href="{{ route('posts.show', $post->post_id) }}"
                             class="btn flex w-full items-center justify-center
                                 bg-slate-100 px-2 py-2 text-xs
-                                font-semibold text-slate-500"
-                            title="This is your post"
+                                font-semibold text-slate-600 hover:bg-slate-200"
+                            title="Manage your post"
                         >
                             My Post
-                        </span>
+                        </a>
 
-                    @elseif (\Illuminate\Support\Facades\Route::has('join-requests.create'))
+                    @else
 
                         <a
                             href="{{ route('join-requests.create', $post->post_id) }}"
@@ -126,19 +117,6 @@
                         >
                             Apply
                         </a>
-
-                    @else
-
-                        <button
-                            type="button"
-                            disabled
-                            title="Apply feature is not available yet"
-                            class="btn w-full cursor-not-allowed
-                                bg-emerald-600 px-2 py-2 text-xs
-                                text-white opacity-50"
-                        >
-                            Apply
-                        </button>
 
                     @endif
 

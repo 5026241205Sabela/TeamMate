@@ -13,10 +13,17 @@ class DeleteCompletedPosts extends Command
 
     public function handle(): int
     {
-        $deleted = Post::where('post_status', 'completed')
+        $posts = Post::where('post_status', 'completed')
             ->whereNotNull('deletion_schedule')
             ->where('deletion_schedule', '<=', now())
-            ->delete();
+            ->get();
+
+        $deleted = 0;
+
+        foreach ($posts as $post) {
+            $post->deleteWithRelations();
+            $deleted++;
+        }
 
         $this->info("{$deleted} completed post(s) deleted.");
 

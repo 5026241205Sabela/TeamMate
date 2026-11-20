@@ -7,35 +7,30 @@ beforeEach(function () {
 test('login page can be rendered', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee(['Email Address', 'Password', 'Remember Me', 'Forgot Password?'])
+        ->assertSee(['NIM / Email', 'Password', 'Remember Me', 'Forgot Password?'])
         ->assertSee(route('register'), false)
         ->assertSee(route('password.request'), false);
 });
 
-test('login requires email and password', function () {
+test('login requires nim/email and password', function () {
     $this->post(route('login.store'), [])
-        ->assertSessionHasErrors(['email', 'password']);
+        ->assertSessionHasErrors(['login', 'password']);
 });
 
-test('login requires a valid email format', function () {
-    $this->post(route('login.store'), ['email' => 'invalid', 'password' => 'secret'])
-        ->assertSessionHasErrors('email');
-});
-
-test('valid credentials log the account in and redirect home', function () {
+test('registered students can log in with their NIM and password', function () {
     $account = makeAccount();
 
-    $this->post(route('login.store'), ['email' => 'sabela@student.test', 'password' => 'Password123'])
+    $this->post(route('login.store'), ['login' => '5026241205', 'password' => 'Password123'])
         ->assertRedirect(route('home'))
         ->assertSessionHasNoErrors();
 
     $this->assertAuthenticatedAs($account);
 });
 
-test('email is matched regardless of letter case', function () {
+test('valid credentials log the account in via email regardless of letter case', function () {
     $account = makeAccount();
 
-    $this->post(route('login.store'), ['email' => 'Sabela@Student.Test', 'password' => 'Password123'])
+    $this->post(route('login.store'), ['login' => 'Sabela@Student.Test', 'password' => 'Password123'])
         ->assertRedirect(route('home'));
 
     $this->assertAuthenticatedAs($account);
@@ -45,16 +40,16 @@ test('wrong password is rejected with a clear message', function () {
     makeAccount();
 
     $this->from(route('login'))
-        ->post(route('login.store'), ['email' => 'sabela@student.test', 'password' => 'wrong-password'])
+        ->post(route('login.store'), ['login' => '5026241205', 'password' => 'wrong-password'])
         ->assertRedirect(route('login'))
-        ->assertSessionHasErrors('email');
+        ->assertSessionHasErrors('login');
 
     $this->assertGuest();
 });
 
-test('unknown email is rejected', function () {
-    $this->post(route('login.store'), ['email' => 'tidakada@student.test', 'password' => 'Password123'])
-        ->assertSessionHasErrors('email');
+test('unknown NIM or email is rejected', function () {
+    $this->post(route('login.store'), ['login' => '9999999999', 'password' => 'Password123'])
+        ->assertSessionHasErrors('login');
 
     $this->assertGuest();
 });
@@ -62,7 +57,7 @@ test('unknown email is rejected', function () {
 test('remember me sets the remember token', function () {
     $account = makeAccount();
 
-    $this->post(route('login.store'), ['email' => 'sabela@student.test', 'password' => 'Password123', 'remember' => '1']);
+    $this->post(route('login.store'), ['login' => '5026241205', 'password' => 'Password123', 'remember' => '1']);
 
     expect($account->fresh()->remember_token)->not->toBeNull();
 });
@@ -71,10 +66,10 @@ test('login is throttled after repeated failures', function () {
     makeAccount();
 
     foreach (range(1, 5) as $attempt) {
-        $this->post(route('login.store'), ['email' => 'sabela@student.test', 'password' => 'wrong']);
+        $this->post(route('login.store'), ['login' => '5026241205', 'password' => 'wrong']);
     }
 
-    $this->post(route('login.store'), ['email' => 'sabela@student.test', 'password' => 'Password123'])
+    $this->post(route('login.store'), ['login' => '5026241205', 'password' => 'Password123'])
         ->assertStatus(429);
 });
 

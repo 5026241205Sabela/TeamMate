@@ -21,6 +21,16 @@ class JoinRequest extends Model
         'request_status',
     ];
 
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'request_date' => 'datetime',
+        ];
+    }
+
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'account_id', 'account_id');

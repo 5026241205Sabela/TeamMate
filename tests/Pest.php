@@ -88,25 +88,27 @@ function createTestSchema(): void
 
     Schema::create('requirement_files', function (Blueprint $table) {
         $table->increments('file_id');
-        $table->unsignedInteger('request_id');
-        $table->string('file_type', 50);
-        $table->string('storage_Location');
+        $table->unsignedInteger('request_id')->unique();
+        $table->string('file_name', 255);
+        $table->string('file_type', 100)->nullable();
+        $table->text('file_location');
+        $table->timestamp('upload_date')->useCurrent();
     });
 
     Schema::create('reports', function (Blueprint $table) {
-        $table->increments('report_id');
+        $table->string('report_id', 36)->primary();
         $table->unsignedInteger('post_id');
-        $table->string('reason', 100);
+        $table->string('reason', 255);
         $table->text('description')->nullable();
         $table->timestamp('report_date')->useCurrent();
+        $table->string('report_status', 50)->default('keep');
     });
 
     Schema::create('notifications', function (Blueprint $table) {
         $table->increments('notification_id');
         $table->unsignedInteger('account_id');
         $table->text('message');
-        $table->boolean('read_status')->default(false);
-        $table->timestamp('delivery_time')->useCurrent();
+        $table->timestamp('time_created')->useCurrent();
     });
 }
 

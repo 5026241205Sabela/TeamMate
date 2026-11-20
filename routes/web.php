@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountVerificationController;
+use App\Http\Controllers\Admin\ReportModerationController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CompetitionPostController;
 use App\Http\Controllers\JoinRequestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
@@ -69,14 +71,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/verifications/{account}/approve', [AccountVerificationController::class, 'approve'])->name('verifications.approve');
     Route::patch('/verifications/{account}/reject', [AccountVerificationController::class, 'reject'])->name('verifications.reject');
     Route::get('/verifications/{account}/ktm', [AccountVerificationController::class, 'ktm'])->name('verifications.ktm');
-});
 
-Route::get('/posts/latest', [PostController::class, 'latest'])->name('posts.latest');
+    Route::get('/reports', [ReportModerationController::class, 'index'])->name('reports.index');
+    Route::delete('/reports/{post}/remove-post', [ReportModerationController::class, 'removePost'])->name('reports.remove-post');
+    Route::patch('/reports/{post}/keep-post', [ReportModerationController::class, 'keepPost'])->name('reports.keep-post');
+});
 
 Route::middleware(['auth', 'account.verified'])->group(function () {
     Route::get('/home', [PostController::class, 'home'])->name('home');
+    Route::get('/posts/latest', [PostController::class, 'latest'])->name('posts.latest');
 
-    // Competition Posts (create, my-posts, edit status)
+    // Competition Posts (create, show, destroy, my-posts, edit status)
     Route::get('/create-post', [CompetitionPostController::class, 'create'])
         ->name('posts.create');
 
@@ -87,17 +92,38 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         ->name('posts.index');
 
     Route::get('/my-posts/{post}/edit', [CompetitionPostController::class, 'edit'])
+        ->whereNumber('post')
         ->name('posts.edit');
 
     Route::patch('/my-posts/{post}/status', [CompetitionPostController::class, 'updateStatus'])
+        ->whereNumber('post')
         ->name('posts.update-status');
 
+    Route::get('/posts/{post}', [CompetitionPostController::class, 'show'])
+        ->whereNumber('post')
+        ->name('posts.show');
+
+    Route::delete('/posts/{post}', [CompetitionPostController::class, 'destroy'])
+        ->whereNumber('post')
+        ->name('posts.destroy');
+
     // Join Requests
+    Route::get('/posts/{post}/apply', [JoinRequestController::class, 'create'])
+        ->whereNumber('post')
+        ->name('join-requests.create');
+
+    Route::post('/posts/{post}/apply', [JoinRequestController::class, 'store'])
+        ->whereNumber('post')
+        ->name('join-requests.store');
+
     Route::get('/join-requests', [JoinRequestController::class, 'index'])
         ->name('join-requests.index');
 
     Route::patch('/join-requests/{joinRequest}/status', [JoinRequestController::class, 'updateStatus'])
         ->name('join-requests.update-status');
+
+    Route::get('/join-requests/{joinRequest}/file', [JoinRequestController::class, 'downloadFile'])
+        ->name('join-requests.file');
 
     // Reports
     Route::get('/reports/create/{post}', [ReportController::class, 'create'])
@@ -105,4 +131,11 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
 
     Route::post('/reports/{post}', [ReportController::class, 'store'])
         ->name('reports.store');
+
+    // Notifications & Profile
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::view('/profile', 'profile.show')
+        ->name('profile.show');
 });

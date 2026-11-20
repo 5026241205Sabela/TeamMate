@@ -16,7 +16,18 @@ class Notification extends Model
     protected $fillable = [
         'account_id',
         'message',
+        'time_created',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'time_created' => 'datetime',
+        ];
+    }
 
     public function account(): BelongsTo
     {

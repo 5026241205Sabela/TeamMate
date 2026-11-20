@@ -243,7 +243,7 @@
             <div>
                 <div class="status-name">Found a TeamMate</div>
                 <div class="status-description">
-                    Mark your team as complete. The post will be archived.
+                    Mark your team as complete. This post will be automatically deleted after 2 days.
                 </div>
             </div>
         </label>

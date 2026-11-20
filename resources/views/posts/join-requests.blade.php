@@ -229,6 +229,15 @@
             </div>
         @endif
 
+        @if (isset($filteredPost) && $filteredPost)
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3 text-sm text-navy-900">
+                <span>Menampilkan pelamar untuk postingan: <strong>{{ $filteredPost->title }}</strong></span>
+                <a href="{{ route('join-requests.index') }}" class="text-xs font-semibold text-[#2160f5] hover:underline">
+                    Show all posts
+                </a>
+            </div>
+        @endif
+
         <h2 class="section-title">
             <span class="count-badge">{{ $pendingRequests->count() }}</span>
             Pending Review
@@ -240,7 +249,7 @@
                 $initials = collect(explode(' ', trim($name)))
                     ->filter()
                     ->take(2)
-                    ->map(fn ($word) => strtoupper(substr($word, 0, 1)))
+                    ->map(fn (string $word) => mb_strtoupper(mb_substr($word, 0, 1)))
                     ->implode('');
             @endphp
 
@@ -266,7 +275,9 @@
                     <div class="request-meta">
                         @if ($joinRequest->requirementFile)
                             <div class="meta-item">
-                                <span class="file-name">{{ $joinRequest->requirementFile->file_name }}</span>
+                                <a href="{{ route('join-requests.file', $joinRequest->request_id) }}" target="_blank" rel="noopener" class="file-name hover:underline">
+                                    {{ $joinRequest->requirementFile->file_name }}
+                                </a>
                             </div>
                         @endif
 
@@ -281,6 +292,9 @@
                         <form method="POST" action="{{ route('join-requests.update-status', $joinRequest->request_id) }}">
                             @csrf
                             @method('PATCH')
+                            @if (isset($filteredPost) && $filteredPost)
+                                <input type="hidden" name="post_id" value="{{ $filteredPost->post_id }}">
+                            @endif
                             <input type="hidden" name="request_status" value="declined">
                             <button type="submit" class="btn-action btn-decline">Decline</button>
                         </form>
@@ -288,6 +302,9 @@
                         <form method="POST" action="{{ route('join-requests.update-status', $joinRequest->request_id) }}">
                             @csrf
                             @method('PATCH')
+                            @if (isset($filteredPost) && $filteredPost)
+                                <input type="hidden" name="post_id" value="{{ $filteredPost->post_id }}">
+                            @endif
                             <input type="hidden" name="request_status" value="accepted">
                             <button type="submit" class="btn-action btn-accept">Accept</button>
                         </form>
@@ -312,7 +329,7 @@
                 $initials = collect(explode(' ', trim($name)))
                     ->filter()
                     ->take(2)
-                    ->map(fn ($word) => strtoupper(substr($word, 0, 1)))
+                    ->map(fn (string $word) => mb_strtoupper(mb_substr($word, 0, 1)))
                     ->implode('');
                 $status = $joinRequest->request_status;
             @endphp
@@ -339,7 +356,9 @@
                     <div class="request-meta">
                         @if ($joinRequest->requirementFile)
                             <div class="meta-item">
-                                <span class="file-name">{{ $joinRequest->requirementFile->file_name }}</span>
+                                <a href="{{ route('join-requests.file', $joinRequest->request_id) }}" target="_blank" rel="noopener" class="file-name hover:underline">
+                                    {{ $joinRequest->requirementFile->file_name }}
+                                </a>
                             </div>
                         @endif
 

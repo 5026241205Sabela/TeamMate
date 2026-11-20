@@ -15,7 +15,7 @@
             <form method="POST" action="{{ route('login.store') }}" class="mt-8 space-y-5" novalidate>
                 @csrf
 
-                <x-form.input name="email" label="Email Address" type="email" placeholder="you@example.com" autocomplete="email" required autofocus />
+                <x-form.input name="login" label="NIM / Email" type="text" placeholder="Masukkan NIM atau email terdaftar" autocomplete="username" required autofocus />
                 <x-form.input name="password" label="Password" type="password" placeholder="Masukkan password" autocomplete="current-password" required />
 
                 <div class="flex items-center justify-between text-sm">

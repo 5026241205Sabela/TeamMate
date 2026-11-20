@@ -390,6 +390,26 @@
             @if ($currentAccount?->isAdmin())
                 @php
                     $activeStatus = request()->query('status', 'all');
+                    $adminPendingAccountsCount = $pendingCount ?? 0;
+                    $adminPendingReportsCount = $pendingPostsCount ?? 0;
+
+                    try {
+                        if (! isset($pendingCount)) {
+                            $adminPendingAccountsCount = \App\Models\Account::query()
+                                ->where('role', '!=', 'admin')
+                                ->where('verification_status', 'pending')
+                                ->count();
+                        }
+
+                        if (! isset($pendingPostsCount)) {
+                            $adminPendingReportsCount = \App\Models\Post::query()
+                                ->whereHas('reports', fn (\Illuminate\Database\Eloquent\Builder $query) => $query->where('report_status', 'pending'))
+                                ->count();
+                        }
+                    } catch (\Throwable) {
+                        $adminPendingAccountsCount = 0;
+                        $adminPendingReportsCount = 0;
+                    }
                 @endphp
 
                 <a class="nav-link {{ request()->routeIs('admin.verifications.*') && $activeStatus === 'all' ? 'active' : '' }}" href="{{ route('admin.verifications.index', ['status' => 'all']) }}">
@@ -405,8 +425,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2" />
                     </svg>
                     <span>Menunggu Review</span>
-                    @if (($pendingCount ?? 0) > 0)
-                        <span class="notification-badge">{{ $pendingCount }}</span>
+                    @if ($adminPendingAccountsCount > 0)
+                        <span class="notification-badge">{{ $adminPendingAccountsCount }}</span>
                     @endif
                 </a>
 
@@ -424,6 +444,16 @@
                     </svg>
                     <span>Ditolak (Tidak Valid)</span>
                 </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                    </svg>
+                    <span>Report List</span>
+                    @if ($adminPendingReportsCount > 0)
+                        <span class="notification-badge">{{ $adminPendingReportsCount }}</span>
+                    @endif
+                </a>
             @else
                 <a class="create-link" href="{{ route('posts.create') }}">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
@@ -439,7 +469,7 @@
                     <span>Home</span>
                 </a>
 
-                <a class="nav-link {{ request()->routeIs('posts.index', 'posts.edit') ? 'active' : '' }}" href="{{ route('posts.index') }}">
+                <a class="nav-link {{ request()->routeIs('posts.index', 'posts.edit') || (request()->routeIs('posts.show') && ($isOwner ?? false)) ? 'active' : '' }}" href="{{ route('posts.index') }}">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <rect x="4" y="4" width="16" height="16" rx="2.5" />
                         <path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h5" />
@@ -456,7 +486,7 @@
                     <span>Requests</span>
                 </a>
 
-                <a class="nav-link" href="#" title="Notifications">
+                <a class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}" title="Notifications">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
                     </svg>
@@ -466,7 +496,7 @@
                     @endif
                 </a>
 
-                <a class="nav-link" href="#" title="Profile">
+                <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.show') }}" title="Profile">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <circle cx="12" cy="8" r="4" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 1 0-16 0" />

@@ -73,16 +73,23 @@ test('unverified accounts cannot open competition pages', function () {
 test('unverified accounts are sent to the verification page after logging in', function () {
     makeAccount(['email' => 'unverified@student.test', 'nim' => '5026241888'], verified: false);
 
-    $this->post(route('login.store'), ['email' => 'unverified@student.test', 'password' => 'Password123'])
+    $this->post(route('login.store'), ['login' => '5026241888', 'password' => 'Password123'])
         ->assertRedirect(route('verification.notice'));
 });
 
+test('guests are redirected to login when fetching the latest posts feed', function () {
+    $this->get(route('posts.latest'))
+        ->assertRedirect(route('login'));
+});
+
 test('the feed lists only active posts, newest first', function () {
+    $viewer = makeAccount(['email' => 'viewer1@student.test', 'nim' => '5026249901']);
     makePost(['title' => 'Older team', 'date_created' => now()->subDays(2)]);
     makePost(['title' => 'Newest team', 'date_created' => now()]);
     makePost(['title' => 'Closed team', 'post_status' => 'closed']);
 
-    $this->get(route('posts.latest'))
+    $this->actingAs($viewer)
+        ->get(route('posts.latest'))
         ->assertOk()
         ->assertSeeInOrder(['Newest team', 'Older team'])
         ->assertDontSee('Closed team')
@@ -91,25 +98,31 @@ test('the feed lists only active posts, newest first', function () {
 });
 
 test('the feed can be filtered by keyword and category', function () {
+    $viewer = makeAccount(['email' => 'viewer2@student.test', 'nim' => '5026249902']);
     $tech = Category::firstOrCreate(['category_name' => 'Teknologi']);
     $biz = Category::firstOrCreate(['category_name' => 'Bisnis']);
 
     makePost(['title' => 'Lomba AI Nasional', 'category' => $tech]);
     makePost(['title' => 'Business Case Competition', 'category' => $biz]);
 
-    $this->get(route('posts.latest', ['q' => 'Business']))
+    $this->actingAs($viewer)
+        ->get(route('posts.latest', ['q' => 'Business']))
         ->assertOk()
         ->assertSee('Business Case Competition')
         ->assertDontSee('Lomba AI Nasional');
 
-    $this->get(route('posts.latest', ['category_id' => $tech->category_id]))
+    $this->actingAs($viewer)
+        ->get(route('posts.latest', ['category_id' => $tech->category_id]))
         ->assertOk()
         ->assertSee('Lomba AI Nasional')
         ->assertDontSee('Business Case Competition');
 });
 
 test('the feed shows an empty state with a call to action', function () {
-    $this->get(route('posts.latest'))
+    $viewer = makeAccount(['email' => 'viewer3@student.test', 'nim' => '5026249903']);
+
+    $this->actingAs($viewer)
+        ->get(route('posts.latest'))
         ->assertOk()
         ->assertSee('Tidak ada postingan kompetisi yang cocok')
         ->assertSee(route('posts.create'), false);

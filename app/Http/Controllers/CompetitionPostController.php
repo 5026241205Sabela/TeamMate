@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\JoinRequest;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,53 @@ class CompetitionPostController extends Controller
         return view('posts.my-posts', [
             'posts' => $posts,
         ]);
+    }
+
+    /**
+     * Display full details of a competition post.
+     */
+    public function show(int $id): View
+    {
+        $account = $this->authenticatedAccount();
+
+        $post = Post::with([
+            'account:account_id,full_name,university,email',
+            'category:category_id,category_name',
+        ])
+            ->withCount('joinRequests')
+            ->findOrFail($id);
+
+        $isOwner = (int) $post->account_id === (int) $account->account_id;
+
+        $existingRequest = $isOwner
+            ? null
+            : JoinRequest::where('post_id', $post->post_id)
+                ->where('account_id', $account->account_id)
+                ->first();
+
+        return view('posts.show', [
+            'post' => $post,
+            'isOwner' => $isOwner,
+            'existingRequest' => $existingRequest,
+        ]);
+    }
+
+    /**
+     * Delete a competition post owned by the authenticated account.
+     */
+    public function destroy(int $id): RedirectResponse
+    {
+        $account = $this->authenticatedAccount();
+
+        $post = Post::where('post_id', $id)
+            ->where('account_id', $account->account_id)
+            ->firstOrFail();
+
+        $post->deleteWithRelations();
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Postingan berhasil dihapus.');
     }
 
     /**
@@ -157,8 +205,8 @@ class CompetitionPostController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($validated, $posterPath, $account) {
-                Post::create([
+            $post = DB::transaction(function () use ($validated, $posterPath, $account): Post {
+                return Post::create([
                     'account_id' => $account->account_id,
                     'category_id' => $validated['category_id'],
                     'title' => $validated['title'],
@@ -179,7 +227,7 @@ class CompetitionPostController extends Controller
         }
 
         return redirect()
-            ->route('posts.create')
+            ->route('posts.show', $post->post_id)
             ->with('success', 'Competition post berhasil dipublikasikan!');
     }
 }

@@ -16,6 +16,26 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Normalize NIM or email inputs into a single "login" identifier.
+     */
+    protected function prepareForValidation(): void
+    {
+        $raw = $this->input('login');
+
+        if (! is_string($raw) || trim($raw) === '') {
+            $fallback = $this->input('nim') ?? $this->input('email');
+
+            if (is_string($fallback)) {
+                $this->merge(['login' => trim($fallback)]);
+            }
+
+            return;
+        }
+
+        $this->merge(['login' => trim($raw)]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -23,7 +43,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
             'remember' => ['nullable', 'boolean'],
         ];
@@ -37,7 +57,7 @@ class LoginRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'email' => 'email address',
+            'login' => 'NIM atau email',
         ];
     }
 }

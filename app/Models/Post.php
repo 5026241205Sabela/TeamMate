@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -54,5 +56,44 @@ class Post extends Model
     public function reports(): HasMany
     {
         return $this->hasMany(Report::class, 'post_id', 'post_id');
+    }
+
+    /**
+     * Delete the post along with all related join requests, requirement files, reports, and stored files.
+     */
+    public function deleteWithRelations(): void
+    {
+        $filePaths = [];
+        $posterPath = $this->poster;
+
+        DB::transaction(function () use (&$filePaths, $posterPath): void {
+            $joinRequests = $this->joinRequests()->with('requirementFile')->get();
+
+            $filePaths = $joinRequests
+                ->pluck('requirementFile.file_location')
+                ->filter()
+                ->values()
+                ->all();
+
+            if ($joinRequests->isNotEmpty()) {
+                RequirementFile::query()
+                    ->whereIn('request_id', $joinRequests->pluck('request_id'))
+                    ->delete();
+            }
+
+            $this->joinRequests()->delete();
+            $this->reports()->delete();
+            $this->delete();
+
+            DB::afterCommit(function () use ($filePaths, $posterPath): void {
+                foreach ($filePaths as $path) {
+                    Storage::disk('local')->delete($path);
+                }
+
+                if (filled($posterPath)) {
+                    Storage::disk('public')->delete($posterPath);
+                }
+            });
+        });
     }
 }

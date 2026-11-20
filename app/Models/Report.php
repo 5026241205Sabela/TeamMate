@@ -28,6 +28,16 @@ class Report extends Model
         'report_status',
     ];
 
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'report_date' => 'datetime',
+        ];
+    }
+
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class, 'post_id', 'post_id');
